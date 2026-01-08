@@ -42,7 +42,7 @@
                     Make choices that reflect what matters most to you — each decision reveals how MUN builds the exact skills you’ll need.
                 </p>
                 <p class="text-lg font-medium text-indigo-700 mb-10">
-                    At the end, a real AI will review your path, give you a <strong>Growth Score</strong>, and share personalized insights.
+                    At the end, a real AI will review your path with <strong>Favorite Points</strong>, <strong>Areas for Improvement</strong>, and personalized encouragement.
                 </p>
                 <button id="start-btn" class="bg-secondary hover:bg-primary text-white text-2xl font-bold px-12 py-6 rounded-full shadow-lg transition transform hover:scale-105">
                     Start Your Quest
@@ -163,7 +163,7 @@
 
         <!-- Results Screen -->
         <section id="results" class="hidden">
-            <div class="bg-white rounded-2xl shadow-2xl p-12 max-w-4xl mx-auto text-center">
+            <div class="bg-white rounded-2xl shadow-2xl p-12 max-w-5xl mx-auto text-center">
                 <i class="fas fa-trophy text-8xl text-accent mb-8"></i>
                 <h2 class="text-5xl font-bold text-primary mb-6">Your MUN Growth Journey Complete!</h2>
                 <div class="bg-gradient-to-r from-accent to-secondary text-white rounded-2xl p-10 mb-10">
@@ -172,28 +172,56 @@
                     <p class="text-2xl mt-6" id="score-message"></p>
                 </div>
 
+                <div class="grid md:grid-cols-2 gap-10 mb-10">
+                    <!-- Favorite Points -->
+                    <div class="bg-green-50 rounded-2xl p-8 border-l-8 border-accent">
+                        <h3 class="text-3xl font-bold text-primary mb-6">
+                            <i class="fas fa-star mr-3 text-accent"></i>Your Favorite Points (Strengths)
+                        </h3>
+                        <div class="text-lg leading-relaxed text-left" id="favorite-points">
+                            <p class="italic text-gray-600 text-center">Generating...</p>
+                        </div>
+                    </div>
+
+                    <!-- Areas for Improvement -->
+                    <div class="bg-yellow-50 rounded-2xl p-8 border-l-8 border-yellow-500">
+                        <h3 class="text-3xl font-bold text-primary mb-6">
+                            <i class="fas fa-arrow-up mr-3 text-yellow-600"></i>Areas for Improvement & How to Boost Them
+                        </h3>
+                        <div class="text-lg leading-relaxed text-left" id="improvement-points">
+                            <p class="italic text-gray-600 text-center">Generating...</p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="text-left bg-blue-50 rounded-2xl p-10 mb-10">
                     <h3 class="text-3xl font-bold text-primary mb-6 text-center">
-                        <i class="fas fa-robot mr-3"></i>AI Coach Review
+                        <i class="fas fa-robot mr-3"></i>Full AI Coach Personalized Review
                     </h3>
                     <div class="text-lg leading-relaxed" id="ai-review">
-                        <p class="italic text-gray-600 text-center">Generating your personalized review...</p>
+                        <p class="italic text-gray-600 text-center">Generating your full review...</p>
                     </div>
                 </div>
 
                 <button onclick="restartGame()" class="bg-secondary hover:bg-primary text-white text-2xl font-bold px-12 py-6 rounded-full shadow-lg transition transform hover:scale-105">
-                    Play Again
+                    Play Again & Aim Higher!
                 </button>
             </div>
         </section>
 
     </main>
 
+    <footer class="bg-primary text-white py-8 mt-20">
+        <div class="max-w-4xl mx-auto text-center px-6">
+            <p class="text-lg">Model United Nations Course • Chapter 2: Why Participate? • January 2026</p>
+        </div>
+    </footer>
+
     <script>
-        // ==== REPLACE WITH YOUR ACTUAL GROQ API KEY ====
+        // ==== REPLACE THIS WITH YOUR ACTUAL GROQ API KEY ====
         const GROQ_API_KEY = "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";
 
-        // Use the latest available Groq model (as of Jan 2026)
+        // Best available Groq model as of January 2026
         const GROQ_MODEL = "llama-3.3-70b-versatile";
 
         let score = 0;
@@ -220,14 +248,14 @@
                     reason: reason
                 });
 
-                // Disable all buttons in current phase
+                // Visual feedback
                 document.querySelectorAll(`#${document.querySelector('.phase:not(.hidden)').id} .choice-btn`).forEach(b => {
                     b.disabled = true;
                     b.classList.add('opacity-70', 'cursor-not-allowed');
                 });
                 this.classList.add('ring-8', 'ring-accent');
 
-                // Move to next phase
+                // Proceed to next phase
                 setTimeout(() => {
                     const current = document.querySelector('.phase:not(.hidden)');
                     current.classList.add('hidden');
@@ -248,37 +276,55 @@
             document.getElementById('final-score-display').textContent = `${score} / 40`;
 
             let message = "";
-            if (score >= 35) message = "Outstanding! You're a natural MUN leader.";
-            else if (score >= 25) message = "Excellent! MUN will accelerate your growth.";
-            else if (score >= 15) message = "Great start! MUN has so much to offer you.";
-            else message = "Every journey begins with a step — MUN is perfect for you!";
+            if (score >= 35) message = "Outstanding! You're perfectly aligned with MUN values.";
+            else if (score >= 25) message = "Excellent! MUN will supercharge your growth.";
+            else if (score >= 15) message = "Strong foundation! MUN has huge potential for you.";
+            else message = "Great start — MUN is the perfect place to build these skills!";
 
             document.getElementById('score-message').textContent = message;
 
-            // Generate AI review
-            const review = await getAIReview();
-            document.getElementById('ai-review').innerHTML = review.replace(/\n/g, '<br>');
+            // Generate structured AI review
+            const structuredReview = await getStructuredAIReview();
+            const { favorite, improvement, full } = structuredReview;
+
+            document.getElementById('favorite-points').innerHTML = favorite;
+            document.getElementById('improvement-points').innerHTML = improvement;
+            document.getElementById('ai-review').innerHTML = full.replace(/\n/g, '<br>');
         }
 
-        async function getAIReview() {
+        async function getStructuredAIReview() {
             const logSummary = choicesLog.map((c, i) => 
-                `Phase ${i+1}: Chose "${c.choice}" (+${c.points} points)\nReason: ${c.reason}`
-            ).join('\n\n');
+                `Phase ${i+1}: "${c.choice}" (+${c.points} points) - Reason: ${c.reason}`
+            ).join('\n');
 
-            const prompt = `You are an encouraging MUN coach speaking directly to a high school student who just completed a "Why Participate in MUN?" game.
+            const prompt = `You are an encouraging, professional MUN coach reviewing a high school student's "Why Participate in MUN?" quest.
 
-They made these choices:
+Student's choices:
 ${logSummary}
 
-Their final Growth Score: ${score}/40
+Final Score: ${score}/40
 
-Give a warm, motivating review (200–300 words):
-- Celebrate their strengths and choices that align well with MUN values
-- Gently suggest how higher-cooperation choices could boost growth
-- Explain how MUN will help them achieve what matters to them
-- End with excitement about their potential in MUN
+Respond in THREE clear sections using exactly these headings:
 
-Tone: supportive, proud, inspiring — like a mentor who believes in them.`;
+**Your Favorite Points (Strengths)**
+- Use bullet points
+- Highlight 3-5 choices that earned high points
+- Celebrate how these align perfectly with MUN skills and values
+- Be warm and proud
+
+**Areas for Improvement & How to Boost Your Score**
+- Use bullet points
+- Point out 2-4 choices that earned lower points
+- Gently explain why more cooperative/ambitious options give higher growth
+- Give specific tips on what to choose next time and how it helps in real MUN
+
+**Overall Personalized Encouragement**
+- 150-250 words full review
+- Tie their strengths and potential improvements to real MUN benefits
+- Explain how aiming for max score (40/40) reflects the mindset of top MUN delegates
+- End with strong motivation and belief in their potential
+
+Tone: supportive, inspiring, mentor-like. Make the student feel capable and excited about MUN.`;
 
             try {
                 const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -290,18 +336,40 @@ Tone: supportive, proud, inspiring — like a mentor who believes in them.`;
                     body: JSON.stringify({
                         model: GROQ_MODEL,
                         messages: [{ role: 'user', content: prompt }],
-                        temperature: 0.8,
-                        max_tokens: 500
+                        temperature: 0.7,
+                        max_tokens: 800
                     })
                 });
 
                 if (!response.ok) throw new Error('API error');
 
                 const data = await response.json();
-                return data.choices[0].message.content.trim();
+                const text = data.choices[0].message.content.trim();
+
+                // Parse sections safely
+                const favoriteMatch = text.match(/\*\*Your Favorite Points \(Strengths\)\*\*(.*?)\*\*Areas for Improvement/s);
+                const improvementMatch = text.match(/\*\*Areas for Improvement & How to Boost Your Score\*\*(.*?)\*\*Overall Personalized Encouragement/s);
+                const fullMatch = text.match(/\*\*Overall Personalized Encouragement\*\*(.*)/s);
+
+                const parseBullets = (str) => {
+                    if (!str) return '<p>No specific feedback available.</p>';
+                    const lines = str.trim().split('\n').filter(line => line.trim().startsWith('-') || line.trim().startsWith('•'));
+                    if (lines.length === 0) return `<p>${str.trim()}</p>`;
+                    return `<ul class="list-disc list-inside space-y-3">${lines.map(line => `<li>${line.replace(/^[-•]\s*/, '').trim()}</li>`).join('')}</ul>`;
+                };
+
+                return {
+                    favorite: parseBullets(favoriteMatch ? favoriteMatch[1] : ''),
+                    improvement: parseBullets(improvementMatch ? improvementMatch[1] : ''),
+                    full: fullMatch ? fullMatch[1].trim() : 'You did great exploring what MUN offers!'
+                };
             } catch (err) {
                 console.error(err);
-                return `Great job completing the quest! Your score of ${score}/40 shows real potential. The choices that gave the highest points were the ones most aligned with what successful MUN delegates do: leading with purpose, collaborating, preparing deeply, and aiming to make a difference. Every point reflects a skill MUN helps you master. You're going to shine in Model United Nations!`;
+                return {
+                    favorite: '<ul class="list-disc list-inside space-y-3"><li>You showed strong interest in leadership and global issues!</li><li>You value preparation and collaboration.</li><li>These are core MUN strengths.</li></ul>',
+                    improvement: '<ul class="list-disc list-inside space-y-3"><li>Try choosing options focused on impact and teamwork for higher growth.</li><li>Active participation and empathy earn the most points.</li><li>Play again — small changes can raise your score a lot!</li></ul>',
+                    full: `Fantastic effort on your quest (${score}/40)! Your choices reveal real potential for Model United Nations. The highest scores come from embracing leadership, deep preparation, empathy, and a desire to solve global challenges — exactly what makes exceptional delegates. Keep exploring, and you'll see how perfectly MUN fits your aspirations. You're going to do amazing things!`
+                };
             }
         }
 
