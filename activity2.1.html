@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 2.1 – How do MUN Conferences Work?</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(to bottom, #e0f2fe, #bae6fd);
+            margin: 0;
+            padding: 10px;
+            color: #333;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        h1 {
+            text-align: center;
+            color: #1e40af;
+            padding: 20px 20px 10px;
+            font-size: 32px;
+            margin: 0;
+        }
+        .progress {
+            text-align: center;
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .main-content {
+            padding: 20px;
+            min-height: 600px;
+            position: relative;
+        }
+        .characters {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            margin: 20px 0;
+        }
+        .character {
+            text-align: center;
+            position: relative;
+            width: 45%;
+        }
+        .avatar {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            background-size: cover;
+            background-position: center;
+            border: 5px solid #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .alex-avatar {
+            background-image: url('./images/download\ \(2\).jpg');
+        }
+        .jordan-avatar {
+            background-image: url('./images/wiil\ boqortooyo.jpg');
+        }
+        .name {
+            font-weight: bold;
+            font-size: 20px;
+        }
+        .alex-name { color: #10b981; }
+        .jordan-name { color: #3b82f6; }
+        .speech-bubble {
+            position: absolute;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 18px;
+            max-width: 380px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+            bottom: 190px;
+        }
+        .speech-bubble.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border: 15px solid transparent;
+        }
+        .alex-bubble {
+            left: 30px;
+        }
+        .alex-bubble::after {
+            border-top-color: #ffffff;
+            left: 60px;
+            bottom: -15px;
+        }
+        .jordan-bubble {
+            right: 30px;
+        }
+        .jordan-bubble::after {
+            border-top-color: #ffffff;
+            right: 60px;
+            bottom: -15px;
+        }
+        .start-screen {
+            text-align: center;
+        }
+        .start-btn, .next-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(59,130,246,0.4);
+            transition: all 0.3s;
+        }
+        .start-btn:hover, .next-btn:hover {
+            background: #1e40af;
+            transform: translateY(-3px);
+        }
+        .phase-title {
+            font-size: 28px;
+            color: #1e40af;
+            text-align: center;
+            margin: 10px 0 20px;
+        }
+        .quiz-question {
+            font-size: 28px;
+            margin: 30px 0;
+            color: #1e40af;
+        }
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .quiz-option {
+            background: #f0f9ff;
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 20px;
+            border: 3px solid transparent;
+        }
+        .quiz-option:hover {
+            background: #e0f2fe;
+            transform: translateY(-5px);
+        }
+        .quiz-option.correct {
+            background: #d4edda;
+            border-color: #10b981;
+        }
+        .quiz-option.incorrect {
+            background: #fce7e7;
+            border-color: #ef4444;
+        }
+        .completion {
+            text-align: center;
+            padding: 60px 20px;
+            font-size: 28px;
+            color: #10b981;
+        }
+        .completion i {
+            font-size: 100px;
+            margin-bottom: 20px;
+        }
+        .hidden { display: none; }
+        @media (max-width: 768px) {
+            .characters { flex-direction: column; align-items: center; }
+            .character { width: 100%; margin-bottom: 30px; }
+            .speech-bubble { position: static; max-width: 100%; margin: 15px auto; }
+            .alex-bubble::after, .jordan-bubble::after { left: 50%; margin-left: -15px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Chapter 2.1 – How do MUN Conferences Work?</h1>
+
+        <div class="main-content">
+            <!-- Start Screen -->
+            <div id="start-screen">
+                <p class="progress">Welcome to your MUN learning adventure!</p>
+                <h2 style="font-size: 36px; color: #1e40af; margin: 30px 0;">Meet Your Guides</h2>
+                <div class="characters">
+                    <div class="character">
+                        <div class="avatar alex-avatar"></div>
+                        <div class="name alex-name">Alex<br><small>First-Time Delegate</small></div>
+                    </div>
+                    <div class="character">
+                        <div class="avatar jordan-avatar"></div>
+                        <div class="name jordan-name">Jordan<br><small>Senior Delegate</small></div>
+                    </div>
+                </div>
+                <p style="font-size: 22px; max-width: 700px; margin: 30px auto 30px; line-height: 1.8;">
+                    Alex is just starting out — full of questions and excitement.<br>
+                    Jordan has lots of experience and will explain everything step by step.<br><br>
+                    Click the button to begin!
+                </p>
+                <button class="start-btn" id="start-btn">Start!</button>
+            </div>
+
+            <!-- Dynamic Content (Conversation + Quiz + Completion) -->
+            <div id="dynamic-content" class="hidden">
+                <p class="progress" id="progress">Phase 1 of 5</p>
+                <div class="phase-title" id="phase-title"></div>
+
+                <div class="characters">
+                    <div class="character">
+                        <div class="avatar alex-avatar"></div>
+                        <div class="name alex-name">Alex</div>
+                    </div>
+                    <div class="character">
+                        <div class="avatar jordan-avatar"></div>
+                        <div class="name jordan-name">Jordan</div>
+                    </div>
+                </div>
+
+                <div style="position: relative; min-height: 280px;">
+                    <div id="alex-bubble" class="speech-bubble alex-bubble"></div>
+                    <div id="jordan-bubble" class="speech-bubble jordan-bubble"></div>
+                </div>
+
+                <div style="text-align: center;">
+                    <button class="next-btn" id="next-btn">Next</button>
+                </div>
+            </div>
+
+            <!-- Quiz Area -->
+            <div id="quiz-area" class="hidden">
+                <p class="progress" id="quiz-progress">Quiz Question 1 of 5</p>
+                <div id="quiz-question-area"></div>
+            </div>
+
+            <!-- Completion -->
+            <div id="completion" class="completion hidden">
+                <i class="fas fa-medal"></i>
+                <h2 style="margin: 30px 0; font-size: 36px;">Fantastic Work!</h2>
+                <p style="font-size: 24px; max-width: 700px; margin: 0 auto 40px;">
+                    You now have a clear picture of how MUN conferences work — from registration to debates and resolutions.<br><br>
+                    You're all set to join your first conference with confidence!
+                </p>
+                <button class="next-btn" onclick="location.reload()">Learn Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const phases = [
+            {
+                title: "Phase 1: What is a MUN Conference?",
+                alex: "Hi Jordan! I'm really excited about joining MUN, but I have no idea how conferences actually work. Can you help?",
+                jordan: "Of course, Alex! I'd love to. A MUN conference is a simulation where students act as diplomats from different countries. We debate real global issues and try to find solutions together, just like in the real United Nations."
+            },
+            {
+                title: "Phase 2: Registration Process",
+                alex: "That sounds interesting! How do I even sign up for one?",
+                jordan: "Great question! First, you find a conference that fits your schedule. Then you register on their website, fill in your details, and pay the registration fee (usually $50–$100). This covers the venue, materials, and organization."
+            },
+            {
+                title: "Phase 3: Assignments",
+                alex: "Okay, I registered! What happens next?",
+                jordan: "A few weeks later, the organizers will send you your country and committee assignments. For example, you might represent Brazil in the Disarmament Committee. From there, you start researching your country's position on the topics."
+            },
+            {
+                title: "Phase 4: Preparation",
+                alex: "So after getting my country, what should I do to prepare?",
+                jordan: "You research deeply, write a position paper, practice speeches, and think about possible allies and solutions. Good preparation makes the conference way more fun and successful!"
+            },
+            {
+                title: "Phase 5: Conference Flow",
+                alex: "Finally — what does the actual conference day look like?",
+                jordan: "It starts with an opening ceremony, then committee sessions with formal speeches, informal negotiations (caucuses), drafting resolutions, and voting. It ends with a closing ceremony. It's busy, exciting, and you'll learn so much!"
+            }
+        ];
+
+        const quizQuestions = [
+            {
+                question: "What is the main purpose of a MUN conference?",
+                options: ["To win awards", "To simulate UN debates and solve global issues", "To travel to new places", "To make new friends only"],
+                correct: 1
+            },
+            {
+                question: "What is usually required to register for a MUN conference?",
+                options: ["A recommendation letter", "Registration form and fee", "Previous MUN experience", "Parent permission only"],
+                correct: 1
+            },
+            {
+                question: "When do delegates typically receive their country assignment?",
+                options: ["On the conference day", "A few weeks after registration", "Immediately after paying", "Never — they choose it"],
+                correct: 1
+            },
+            {
+                question: "What is an important preparation step after receiving your assignment?",
+                options: ["Buy formal clothes", "Research your country's position on topics", "Book hotel", "Practice dancing for socials"],
+                correct: 1
+            },
+            {
+                question: "What happens during committee sessions at the conference?",
+                options: ["Only speeches", "Debates, negotiations, drafting, and voting on resolutions", "Games and activities", "Watching videos"],
+                correct: 1
+            }
+        ];
+
+        let currentPhase = 0;
+        let currentQuiz = 0;
+
+        const startScreen = document.getElementById('start-screen');
+        const dynamicContent = document.getElementById('dynamic-content');
+        const quizArea = document.getElementById('quiz-area');
+        const completion = document.getElementById('completion');
+
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+
+        const alexBubble = document.getElementById('alex-bubble');
+        const jordanBubble = document.getElementById('jordan-bubble');
+        const phaseTitle = document.getElementById('phase-title');
+        const progress = document.getElementById('progress');
+        const quizProgress = document.getElementById('quiz-progress');
+
+        startBtn.addEventListener('click', () => {
+            startScreen.classList.add('hidden');
+            dynamicContent.classList.remove('hidden');
+            currentPhase = 0;
+            showPhase();
+        });
+
+        function showPhase() {
+            const phase = phases[currentPhase];
+            phaseTitle.textContent = phase.title;
+            progress.textContent = `Phase ${currentPhase + 1} of 5`;
+
+            alexBubble.classList.remove('visible');
+            jordanBubble.classList.remove('visible');
+
+            setTimeout(() => {
+                alexBubble.textContent = phase.alex;
+                alexBubble.classList.add('visible');
+            }, 300);
+
+            setTimeout(() => {
+                jordanBubble.textContent = phase.jordan;
+                jordanBubble.classList.add('visible');
+            }, 1200);
+        }
+
+        nextBtn.addEventListener('click', () => {
+            currentPhase++;
+            if (currentPhase < phases.length) {
+                showPhase();
+            } else {
+                dynamicContent.classList.add('hidden');
+                quizArea.classList.remove('hidden');
+                showQuizQuestion();
+            }
+        });
+
+        function showQuizQuestion() {
+            const q = quizQuestions[currentQuiz];
+            quizProgress.textContent = `Quiz Question ${currentQuiz + 1} of 5`;
+
+            quizArea.innerHTML = `
+                <div class="quiz-question">${q.question}</div>
+                <div class="quiz-options">
+                    ${q.options.map((opt, i) => `
+                        <div class="quiz-option" data-index="${i}">${opt}</div>
+                    `).join('')}
+                </div>
+                <div id="quiz-feedback" style="text-align: center; margin-top: 30px; font-size: 22px;"></div>
+            `;
+
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.addEventListener('click', function() {
+                    // Disable all options
+                    document.querySelectorAll('.quiz-option').forEach(o => {
+                        o.style.pointerEvents = 'none';
+                        o.style.cursor = 'default';
+                    });
+
+                    const idx = parseInt(this.dataset.index);
+                    const feedbackDiv = document.getElementById('quiz-feedback');
+
+                    if (idx === q.correct) {
+                        this.classList.add('correct');
+                        feedbackDiv.innerHTML = '<strong style="color: #10b981;">Correct! Excellent!</strong> 🎉';
+                    } else {
+                        this.classList.add('incorrect');
+                        document.querySelectorAll('.quiz-option')[q.correct].classList.add('correct');
+                        feedbackDiv.innerHTML = '<strong style="color: #ef4444;">Not quite.</strong> Correct answer highlighted.';
+                    }
+
+                    // Automatically go to next question after 2 seconds
+                    setTimeout(() => {
+                        currentQuiz++;
+                        if (currentQuiz < quizQuestions.length) {
+                            showQuizQuestion();
+                        } else {
+                            quizArea.classList.add('hidden');
+                            completion.classList.remove('hidden');
+                        }
+                    }, 2000);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
