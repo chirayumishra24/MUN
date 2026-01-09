@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 2.1 – How do MUN Conferences Work?</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e40af',
+                        secondary: '#3b82f6',
+                        accent: '#10b981',
+                        danger: '#ef4444',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 to-blue-100 min-h-screen font-sans">
+
+    <main class="max-w-5xl mx-auto px-6 py-12">
+
+        <!-- Interactive Activity -->
+        <section class="mb-20">
+            <div class="bg-white rounded-2xl shadow-2xl p-12">
+                <h2 class="text-4xl font-bold text-primary text-center mb-8">Build Your First MUN Conference</h2>
+                <p class="text-xl text-gray-700 text-center mb-12 max-w-3xl mx-auto">
+                    Assemble a real MUN conference step by step. Only correct choices will unlock the next stage.
+                </p>
+
+                <!-- Progress Dots -->
+                <div class="flex justify-center gap-8 mb-12">
+                    <div class="w-12 h-12 rounded-full bg-secondary text-white flex items-center justify-center font-bold text-xl stage-dot current" data-stage="1">1</div>
+                    <div class="w-12 h-12 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-bold text-xl stage-dot locked" data-stage="2">2</div>
+                    <div class="w-12 h-12 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-bold text-xl stage-dot locked" data-stage="3">3</div>
+                    <div class="w-12 h-12 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-bold text-xl stage-dot locked" data-stage="4">4</div>
+                </div>
+
+                <!-- Stage 1: Committee Selection -->
+                <div id="stage-1" class="stage">
+                    <h3 class="text-2xl font-bold text-primary mb-6 text-center">Stage 1: Select Valid MUN Committees</h3>
+                    <p class="text-center text-gray-700 mb-8">Click on committees that are commonly found in MUN conferences.</p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        <div class="committee-card bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition cursor-pointer" data-valid="true">
+                            <h4 class="text-xl font-bold">General Assembly (UNGA)</h4>
+                        </div>
+                        <div class="committee-card bg-gradient-to-br from-green-500 to-teal-600 text-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition cursor-pointer" data-valid="true">
+                            <h4 class="text-xl font-bold">Security Council (UNSC)</h4>
+                        </div>
+                        <div class="committee-card bg-gradient-to-br from-purple-500 to-pink-600 text-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition cursor-pointer" data-valid="true">
+                            <h4 class="text-xl font-bold">World Health Organization (WHO)</h4>
+                        </div>
+                        <div class="committee-card bg-gradient-to-br from-orange-500 to-red-600 text-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition cursor-pointer" data-valid="false">
+                            <h4 class="text-xl font-bold">International Olympic Committee</h4>
+                        </div>
+                        <div class="committee-card bg-gradient-to-br from-cyan-500 to-blue-600 text-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition cursor-pointer" data-valid="true">
+                            <h4 class="text-xl font-bold">Human Rights Council (HRC)</h4>
+                        </div>
+                        <div class="committee-card bg-gradient-to-br from-yellow-500 to-amber-600 text-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition cursor-pointer" data-valid="false">
+                            <h4 class="text-xl font-bold">FIFA Executive Board</h4>
+                        </div>
+                    </div>
+                    <div class="text-center mt-8 space-x-4">
+                        <button id="submit-stage1" class="bg-secondary hover:bg-primary text-white font-bold py-4 px-10 rounded-full text-xl shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>Submit Selection</button>
+                        <button id="reset-stage1" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-4 px-10 rounded-full text-xl shadow-lg transition">Reset</button>
+                        <p id="feedback-stage1" class="mt-4 text-lg font-medium"></p>
+                    </div>
+                </div>
+
+                <!-- Stage 2: Role Assignment -->
+                <div id="stage-2" class="stage hidden">
+                    <h3 class="text-2xl font-bold text-primary mb-6 text-center">Stage 2: Assign Correct Roles</h3>
+                    <p class="text-center text-gray-700 mb-8">Drag each role to its correct responsibility.</p>
+                    <div class="grid md:grid-cols-2 gap-12">
+                        <div>
+                            <h4 class="text-xl font-semibold mb-4">Roles</h4>
+                            <div class="space-y-4" id="roles-source">
+                                <div class="role-item bg-blue-100 p-6 rounded-lg cursor-grab" draggable="true" data-role="Chair">Chair</div>
+                                <div class="role-item bg-green-100 p-6 rounded-lg cursor-grab" draggable="true" data-role="Delegate">Delegate</div>
+                                <div class="role-item bg-purple-100 p-6 rounded-lg cursor-grab" draggable="true" data-role="Rapporteur">Rapporteur</div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-semibold mb-4">Responsibilities</h4>
+                            <div class="space-y-4">
+                                <div class="drop-zone bg-gray-50 border-4 border-dashed rounded-lg p-8 min-h-32" data-correct="Chair">Moderates debate and maintains order</div>
+                                <div class="drop-zone bg-gray-50 border-4 border-dashed rounded-lg p-8 min-h-32" data-correct="Delegate">Represents a country and speaks on its behalf</div>
+                                <div class="drop-zone bg-gray-50 border-4 border-dashed rounded-lg p-8 min-h-32" data-correct="Rapporteur">Records and compiles resolutions</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-8 space-x-4">
+                        <button id="submit-stage2" class="bg-secondary hover:bg-primary text-white font-bold py-4 px-10 rounded-full text-xl shadow-lg transition">Check Assignment</button>
+                        <button id="reset-stage2" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-4 px-10 rounded-full text-xl shadow-lg transition">Reset</button>
+                        <p id="feedback-stage2" class="mt-4 text-lg font-medium"></p>
+                    </div>
+                </div>
+
+                <!-- Stage 3: Agenda Setup -->
+                <div id="stage-3" class="stage hidden">
+                    <h3 class="text-2xl font-bold text-primary mb-6 text-center">Stage 3: Set the Agenda</h3>
+                    <p class="text-center text-gray-700 mb-8">For the General Assembly committee, select ONE appropriate agenda topic.</p>
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="agenda-card bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition cursor-pointer" data-valid="true">
+                            <h4 class="text-2xl font-bold">Sustainable Development Goals Progress</h4>
+                        </div>
+                        <div class="agenda-card bg-gradient-to-br from-teal-500 to-green-600 text-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition cursor-pointer" data-valid="true">
+                            <h4 class="text-2xl font-bold">Climate Change Mitigation Strategies</h4>
+                        </div>
+                        <div class="agenda-card bg-gradient-to-br from-orange-500 to-red-600 text-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition cursor-pointer" data-valid="false">
+                            <h4 class="text-2xl font-bold">Best Football Team of the Year</h4>
+                        </div>
+                    </div>
+                    <div class="text-center mt-8 space-x-4">
+                        <button id="submit-stage3" class="bg-secondary hover:bg-primary text-white font-bold py-4 px-10 rounded-full text-xl shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>Confirm Agenda</button>
+                        <button id="reset-stage3" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-4 px-10 rounded-full text-xl shadow-lg transition">Reset</button>
+                        <p id="feedback-stage3" class="mt-4 text-lg font-medium"></p>
+                    </div>
+                </div>
+
+                <!-- Stage 4: Debate Flow Builder -->
+                <div id="stage-4" class="stage hidden">
+                    <h3 class="text-2xl font-bold text-primary mb-6 text-center">Stage 4: Arrange the Debate Flow</h3>
+                    <p class="text-center text-gray-700 mb-8">Drag the steps into the correct order of a typical committee session.</p>
+                    <div class="flex flex-col md:flex-row gap-12">
+                        <div class="w-full md:w-1/2">
+                            <h4 class="text-xl font-semibold mb-4">Available Steps</h4>
+                            <div id="flow-source" class="space-y-4">
+                                <div class="flow-item bg-blue-100 p-6 rounded-lg cursor-grab" draggable="true">Roll Call</div>
+                                <div class="flow-item bg-green-100 p-6 rounded-lg cursor-grab" draggable="true">General Speakers List (GSL)</div>
+                                <div class="flow-item bg-purple-100 p-6 rounded-lg cursor-grab" draggable="true">Moderated Caucus</div>
+                                <div class="flow-item bg-yellow-100 p-6 rounded-lg cursor-grab" draggable="true">Unmoderated Caucus</div>
+                                <div class="flow-item bg-orange-100 p-6 rounded-lg cursor-grab" draggable="true">Draft Resolution Submission</div>
+                                <div class="flow-item bg-red-100 p-6 rounded-lg cursor-grab" draggable="true">Voting Procedure</div>
+                            </div>
+                        </div>
+                        <div class="w-full md:w-1/2">
+                            <h4 class="text-xl font-semibold mb-4">Correct Order</h4>
+                            <div id="flow-target" class="bg-gray-50 border-4 border-dashed rounded-lg p-8 min-h-96"></div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-8 space-x-4">
+                        <button id="submit-stage4" class="bg-secondary hover:bg-primary text-white font-bold py-4 px-10 rounded-full text-xl shadow-lg transition">Check Flow</button>
+                        <button id="reset-stage4" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-4 px-10 rounded-full text-xl shadow-lg transition">Reset</button>
+                        <p id="feedback-stage4" class="mt-4 text-lg font-medium"></p>
+                    </div>
+                </div>
+
+                <!-- Final Result (Always Shown) -->
+                <div id="final-result" class="hidden text-center py-20">
+                    <i class="fas fa-trophy text-9xl text-accent mb-8"></i>
+                    <h2 class="text-5xl font-bold text-primary mb-6">Conference Building Complete!</h2>
+                    <p class="text-2xl text-gray-700 max-w-3xl mx-auto mb-8">
+                        <span id="result-summary"></span>
+                    </p>
+                    <p class="text-xl text-gray-600 mb-12" id="result-detail"></p>
+                    <button onclick="location.reload()" class="bg-secondary hover:bg-primary text-white font-bold py-4 px-10 rounded-full text-xl shadow-lg transition">
+                        Build Another Conference
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Reusable data for easy editing
+        const activityData = {
+            stages: 4,
+            committees: [
+                { name: "General Assembly (UNGA)", valid: true },
+                { name: "Security Council (UNSC)", valid: true },
+                { name: "World Health Organization (WHO)", valid: true },
+                { name: "International Olympic Committee", valid: false },
+                { name: "Human Rights Council (HRC)", valid: true },
+                { name: "FIFA Executive Board", valid: false }
+            ],
+            roles: [
+                { role: "Chair", responsibility: "Moderates debate and maintains order" },
+                { role: "Delegate", responsibility: "Represents a country and speaks on its behalf" },
+                { role: "Rapporteur", responsibility: "Records and compiles resolutions" }
+            ],
+            agendas: [
+                { name: "Sustainable Development Goals Progress", valid: true },
+                { name: "Climate Change Mitigation Strategies", valid: true },
+                { name: "Best Football Team of the Year", valid: false }
+            ],
+            debateFlow: ["Roll Call", "General Speakers List (GSL)", "Moderated Caucus", "Unmoderated Caucus", "Draft Resolution Submission", "Voting Procedure"]
+        };
+
+        let stageResults = {
+            1: false,
+            2: false,
+            3: false,
+            4: false
+        };
+
+        // Stage 1: Committee Selection
+        const selectedCommittees = new Set();
+        document.querySelectorAll('.committee-card').forEach(card => {
+            card.addEventListener('click', function() {
+                this.classList.toggle('ring-8', 'ring-accent');
+                const name = this.querySelector('h4').textContent;
+                if (selectedCommittees.has(name)) {
+                    selectedCommittees.delete(name);
+                } else {
+                    selectedCommittees.add(name);
+                }
+                document.getElementById('submit-stage1').disabled = selectedCommittees.size === 0;
+            });
+        });
+
+        document.getElementById('submit-stage1').addEventListener('click', () => {
+            const valid = activityData.committees.filter(c => c.valid).map(c => c.name);
+            const allCorrect = [...selectedCommittees].every(name => valid.includes(name)) && selectedCommittees.size >= 3;
+            const feedback = document.getElementById('feedback-stage1');
+
+            stageResults[1] = allCorrect;
+
+            if (allCorrect) {
+                feedback.textContent = "Excellent! You selected valid MUN committees.";
+                feedback.style.color = '#10b981';
+            } else {
+                feedback.textContent = "Some committees are not typical in MUN.";
+                feedback.style.color = '#ef4444';
+            }
+
+            updateProgress();
+            setTimeout(() => {
+                document.getElementById('stage-1').classList.add('hidden');
+                document.getElementById('stage-2').classList.remove('hidden');
+            }, 2000);
+        });
+
+        document.getElementById('reset-stage1').addEventListener('click', () => {
+            selectedCommittees.clear();
+            document.querySelectorAll('.committee-card').forEach(card => card.classList.remove('ring-8', 'ring-accent'));
+            document.getElementById('submit-stage1').disabled = true;
+            document.getElementById('feedback-stage1').textContent = '';
+        });
+
+        // Stage 2: Role Assignment
+        let draggedItem = null;
+        document.querySelectorAll('.role-item').forEach(item => {
+            item.addEventListener('dragstart', e => {
+                draggedItem = item;
+                e.dataTransfer.effectAllowed = 'move';
+            });
+        });
+
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            zone.addEventListener('dragover', e => e.preventDefault());
+            zone.addEventListener('drop', e => {
+                e.preventDefault();
+                if (draggedItem && draggedItem.dataset.role === zone.dataset.correct) {
+                    zone.appendChild(draggedItem);
+                    zone.classList.add('bg-green-100');
+                }
+            });
+        });
+
+        document.getElementById('submit-stage2').addEventListener('click', () => {
+            const dropZones = document.querySelectorAll('.drop-zone');
+            const allCorrect = Array.from(dropZones).every(zone => zone.children.length === 1 && zone.children[0].dataset.role === zone.dataset.correct);
+            const feedback = document.getElementById('feedback-stage2');
+
+            stageResults[2] = allCorrect;
+
+            if (allCorrect) {
+                feedback.textContent = "Roles assigned correctly!";
+                feedback.style.color = '#10b981';
+            } else {
+                feedback.textContent = "Some roles are misplaced.";
+                feedback.style.color = '#ef4444';
+            }
+
+            updateProgress();
+            setTimeout(() => {
+                document.getElementById('stage-2').classList.add('hidden');
+                document.getElementById('stage-3').classList.remove('hidden');
+            }, 2000);
+        });
+
+        document.getElementById('reset-stage2').addEventListener('click', () => {
+            const source = document.getElementById('roles-source');
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                if (zone.children.length > 0) {
+                    source.appendChild(zone.children[0]);
+                    zone.classList.remove('bg-green-100');
+                }
+            });
+            document.getElementById('feedback-stage2').textContent = '';
+        });
+
+        // Stage 3: Agenda Setup
+        let selectedAgenda = null;
+        document.querySelectorAll('.agenda-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.agenda-card').forEach(c => c.classList.remove('ring-8', 'ring-accent'));
+                this.classList.add('ring-8', 'ring-accent');
+                selectedAgenda = this.querySelector('h4').textContent;
+                document.getElementById('submit-stage3').disabled = false;
+            });
+        });
+
+        document.getElementById('submit-stage3').addEventListener('click', () => {
+            const isValid = activityData.agendas.find(a => a.name === selectedAgenda)?.valid;
+            const feedback = document.getElementById('feedback-stage3');
+
+            stageResults[3] = isValid;
+
+            if (isValid) {
+                feedback.textContent = "Appropriate agenda selected!";
+                feedback.style.color = '#10b981';
+            } else {
+                feedback.textContent = "This topic is not suitable for GA.";
+                feedback.style.color = '#ef4444';
+            }
+
+            updateProgress();
+            setTimeout(() => {
+                document.getElementById('stage-3').classList.add('hidden');
+                document.getElementById('stage-4').classList.remove('hidden');
+            }, 2000);
+        });
+
+        document.getElementById('reset-stage3').addEventListener('click', () => {
+            document.querySelectorAll('.agenda-card').forEach(c => c.classList.remove('ring-8', 'ring-accent'));
+            selectedAgenda = null;
+            document.getElementById('submit-stage3').disabled = true;
+            document.getElementById('feedback-stage3').textContent = '';
+        });
+
+        // Stage 4: Debate Flow Builder
+        const flowSource = document.getElementById('flow-source');
+        const flowTarget = document.getElementById('flow-target');
+
+        flowSource.querySelectorAll('.flow-item').forEach(item => {
+            item.addEventListener('dragstart', e => {
+                draggedItem = item;
+                e.dataTransfer.effectAllowed = 'move';
+            });
+        });
+
+        flowTarget.addEventListener('dragover', e => e.preventDefault());
+        flowTarget.addEventListener('drop', e => {
+            e.preventDefault();
+            if (draggedItem) {
+                flowTarget.appendChild(draggedItem);
+                draggedItem = null;
+            }
+        });
+
+        document.getElementById('submit-stage4').addEventListener('click', () => {
+            const ordered = Array.from(flowTarget.children).map(item => item.textContent.trim());
+            const correctOrder = activityData.debateFlow;
+            const isCorrect = JSON.stringify(ordered) === JSON.stringify(correctOrder);
+            const feedback = document.getElementById('feedback-stage4');
+
+            stageResults[4] = isCorrect;
+
+            if (isCorrect) {
+                feedback.textContent = "Perfect debate flow!";
+                feedback.style.color = '#10b981';
+            } else {
+                feedback.textContent = "Flow is incorrect.";
+                feedback.style.color = '#ef4444';
+            }
+
+            updateProgress();
+            setTimeout(showFinalResult, 2000);
+        });
+
+        document.getElementById('reset-stage4').addEventListener('click', () => {
+            flowTarget.innerHTML = '';
+            flowSource.append(...document.querySelectorAll('.flow-item'));
+            document.getElementById('feedback-stage4').textContent = '';
+        });
+
+        function updateProgress() {
+            document.querySelectorAll('.stage-dot').forEach((dot, i) => {
+                dot.classList.remove('current', 'completed', 'locked');
+                if (i + 1 <= Object.keys(stageResults).length) {
+                    if (stageResults[i + 1]) {
+                        dot.classList.add('completed');
+                    } else {
+                        dot.classList.add('current');
+                    }
+                } else {
+                    dot.classList.add('locked');
+                }
+            });
+        }
+
+        function showFinalResult() {
+            const correctCount = Object.values(stageResults).filter(v => v).length;
+            const resultTitle = document.getElementById('result-summary');
+            const resultDetail = document.getElementById('result-detail');
+
+            if (correctCount === 4) {
+                resultTitle.textContent = "Conference Successfully Built!";
+                resultTitle.style.color = '#10b981';
+                resultDetail.textContent = "Excellent work! You correctly assembled every component of a MUN conference.";
+            } else {
+                resultTitle.textContent = "Conference Building Complete";
+                resultTitle.style.color = '#3b82f6';
+                resultDetail.textContent = `You completed ${correctCount} out of 4 stages correctly. Review the stages where feedback was given and try again to perfect your MUN setup!`;
+            }
+
+            document.querySelectorAll('.stage').forEach(s => s.classList.add('hidden'));
+            document.getElementById('final-result').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
