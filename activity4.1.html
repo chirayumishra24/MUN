@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decision Lab: Speak or Stay Silent?</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bgStart: '#E0F2FE',
+                        bgEnd: '#BAE6FD',
+                        cardBg: 'rgba(255, 255, 255, 0.6)',
+                        textPrimary: '#1E40AF',
+                        buttonBg: '#3B82F6',
+                        buttonHover: '#1E40AF',
+                        progressBg: '#DBEAFE',
+                        progressFill: '#10B981'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-bgStart to-bgEnd min-h-screen flex items-center justify-center p-4">
+
+    <div id="activity-container" class="w-full max-w-2xl">
+        <!-- Progress Bar -->
+        <div id="progress-bar" class="w-full h-2 bg-progressBg rounded-full mb-8 overflow-hidden">
+            <div id="progress-fill" class="h-full bg-progressFill transition-all duration-500" style="width: 0%;"></div>
+        </div>
+
+        <!-- Scenario Card -->
+        <div id="scenario-card" class="bg-cardBg backdrop-blur-md border border-white/30 rounded-2xl shadow-xl p-8 text-center transition-opacity duration-500 opacity-0">
+            <h2 class="text-3xl font-bold text-textPrimary mb-6">Scenario <span id="scenario-number"></span></h2>
+            <p id="situation-text" class="text-xl text-gray-800 mb-10 leading-relaxed"></p>
+            <div class="flex flex-col gap-4">
+                <!-- Choices will be injected here -->
+            </div>
+        </div>
+
+        <!-- Final Summary Card -->
+        <div id="summary-card" class="hidden bg-cardBg backdrop-blur-md border border-white/30 rounded-2xl shadow-xl p-8 text-center transition-opacity duration-500 opacity-0">
+            <h2 class="text-3xl font-bold text-textPrimary mb-6">Your Negotiation Persona</h2>
+            <p id="persona-title" class="text-2xl font-semibold text-accent mb-4"></p>
+            <div class="mb-8">
+                <h3 class="text-xl font-bold text-textPrimary mb-4">Strengths</h3>
+                <ul id="strengths-list" class="list-disc list-inside text-gray-800 text-lg"></ul>
+            </div>
+            <div class="mb-8">
+                <h3 class="text-xl font-bold text-textPrimary mb-4">Areas to Improve</h3>
+                <ul id="improvements-list" class="list-disc list-inside text-gray-800 text-lg"></ul>
+            </div>
+            <div class="mb-8">
+                <h3 class="text-xl font-bold text-textPrimary mb-4">Score Breakdown</h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">Clarity</span>
+                        <div class="w-3/5 h-3 bg-gray-200 rounded-full overflow-hidden">
+                            <div id="clarity-bar" class="h-full bg-blue-400 transition-all duration-1000"></div>
+                        </div>
+                        <span id="clarity-score" class="text-gray-800 font-semibold"></span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">Confidence</span>
+                        <div class="w-3/5 h-3 bg-gray-200 rounded-full overflow-hidden">
+                            <div id="confidence-bar" class="h-full bg-green-400 transition-all duration-1000"></div>
+                        </div>
+                        <span id="confidence-score" class="text-gray-800 font-semibold"></span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">Diplomacy</span>
+                        <div class="w-3/5 h-3 bg-gray-200 rounded-full overflow-hidden">
+                            <div id="diplomacy-bar" class="h-full bg-purple-400 transition-all duration-1000"></div>
+                        </div>
+                        <span id="diplomacy-score" class="text-gray-800 font-semibold"></span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">Influence</span>
+                        <div class="w-3/5 h-3 bg-gray-200 rounded-full overflow-hidden">
+                            <div id="influence-bar" class="h-full bg-orange-400 transition-all duration-1000"></div>
+                        </div>
+                        <span id="influence-score" class="text-gray-800 font-semibold"></span>
+                    </div>
+                </div>
+            </div>
+            <button id="restart-btn" class="bg-buttonBg hover:bg-buttonHover text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform duration-300 hover:scale-105">
+                Restart Simulation
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Scenarios data - reusable array
+        const scenarios = [
+            {
+                situation: "In a moderated caucus on climate change, a delegate from a major polluter country presents a biased view. Do you:",
+                choices: [
+                    { text: "Immediately interrupt to correct them, showing your knowledge.", impacts: { clarity: 1, confidence: 3, diplomacy: -1, influence: 2 } },
+                    { text: "Wait for your turn to speak, then counter with facts and propose a compromise.", impacts: { clarity: 3, confidence: 1, diplomacy: 3, influence: 2 } },
+                    { text: "Remain silent to avoid confrontation.", impacts: { clarity: 0, confidence: -2, diplomacy: 1, influence: -1 } }
+                ]
+            },
+            {
+                situation: "During an unmoderated caucus, you overhear a group forming a bloc that excludes your position. Do you:",
+                choices: [
+                    { text: "Approach and forcefully argue your case to join.", impacts: { clarity: 2, confidence: 3, diplomacy: -1, influence: 1 } },
+                    { text: "Listen first, then diplomatically suggest how your ideas align with theirs.", impacts: { clarity: 2, confidence: 2, diplomacy: 3, influence: 3 } },
+                    { text: "Stay out of it and work on your own resolution.", impacts: { clarity: 1, confidence: 0, diplomacy: 0, influence: -2 } }
+                ]
+            },
+            {
+                situation: "The chair calls for motions. You have a strong idea for a moderated caucus topic. Do you:",
+                choices: [
+                    { text: "Raise your placard and propose it confidently.", impacts: { clarity: 2, confidence: 3, diplomacy: 1, influence: 3 } },
+                    { text: "Wait to see what others propose before speaking.", impacts: { clarity: 0, confidence: -1, diplomacy: 2, influence: 0 } },
+                    { text: "Second someone else's motion instead of proposing your own.", impacts: { clarity: 1, confidence: 0, diplomacy: 3, influence: 1 } }
+                ]
+            },
+            {
+                situation: "A delegate misquotes your country's policy in their speech. Do you:",
+                choices: [
+                    { text: "Raise a point of order to immediately correct it.", impacts: { clarity: 3, confidence: 2, diplomacy: -1, influence: 1 } },
+                    { text: "Note it and address in your next speech politely.", impacts: { clarity: 2, confidence: 1, diplomacy: 3, influence: 2 } },
+                    { text: "Ignore it to keep the peace.", impacts: { clarity: -1, confidence: -2, diplomacy: 2, influence: -1 } }
+                ]
+            },
+            {
+                situation: "Voting is about to start on a resolution you oppose. Do you:",
+                choices: [
+                    { text: "Abstain to avoid conflict.", impacts: { clarity: 0, confidence: -1, diplomacy: 2, influence: -2 } },
+                    { text: "Vote no and explain your position if allowed.", impacts: { clarity: 3, confidence: 3, diplomacy: 1, influence: 2 } },
+                    { text: "Try to rally last-minute opposition.", impacts: { clarity: 1, confidence: 2, diplomacy: 0, influence: 3 } }
+                ]
+            }
+        ];
+
+        // Initial scores
+        let scores = { clarity: 0, confidence: 0, diplomacy: 0, influence: 0 };
+        let currentScenario = 0;
+
+        const progressFill = document.getElementById('progress-fill');
+        const scenarioCard = document.getElementById('scenario-card');
+        const summaryCard = document.getElementById('summary-card');
+        const scenarioNumber = document.getElementById('scenario-number');
+        const situationText = document.getElementById('situation-text');
+        const personaTitle = document.getElementById('persona-title');
+        const strengthsList = document.getElementById('strengths-list');
+        const improvementsList = document.getElementById('improvements-list');
+        const clarityBar = document.getElementById('clarity-bar');
+        const confidenceBar = document.getElementById('confidence-bar');
+        const diplomacyBar = document.getElementById('diplomacy-bar');
+        const influenceBar = document.getElementById('influence-bar');
+        const clarityScore = document.getElementById('clarity-score');
+        const confidenceScore = document.getElementById('confidence-score');
+        const diplomacyScore = document.getElementById('diplomacy-score');
+        const influenceScore = document.getElementById('influence-score');
+        const restartBtn = document.getElementById('restart-btn');
+
+        function showScenario() {
+            scenarioCard.style.opacity = '0';
+            setTimeout(() => {
+                const scenario = scenarios[currentScenario];
+                scenarioNumber.textContent = currentScenario + 1;
+                situationText.textContent = scenario.situation;
+
+                const choicesDiv = scenarioCard.querySelector('.flex');
+                choicesDiv.innerHTML = '';
+                scenario.choices.forEach((choice, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'bg-buttonBg hover:bg-buttonHover text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform duration-300 hover:scale-105';
+                    btn.textContent = choice.text;
+                    btn.addEventListener('click', () => handleChoice(index));
+                    choicesDiv.appendChild(btn);
+                });
+
+                scenarioCard.style.opacity = '1';
+                updateProgress();
+            }, 500);
+        }
+
+        function handleChoice(index) {
+            const choice = scenarios[currentScenario].choices[index];
+            scores.clarity += choice.impacts.clarity;
+            scores.confidence += choice.impacts.confidence;
+            scores.diplomacy += choice.impacts.diplomacy;
+            scores.influence += choice.impacts.influence;
+
+            currentScenario++;
+            if (currentScenario < scenarios.length) {
+                showScenario();
+            } else {
+                scenarioCard.style.opacity = '0';
+                setTimeout(showSummary, 500);
+            }
+        }
+
+        function updateProgress() {
+            const progress = (currentScenario / scenarios.length) * 100;
+            progressFill.style.width = `${progress}%`;
+        }
+
+        function showSummary() {
+            scenarioCard.classList.add('hidden');
+            summaryCard.classList.remove('hidden');
+            setTimeout(() => {
+                summaryCard.style.opacity = '1';
+
+                // Normalize scores (assuming max 3 per choice, 5 scenarios = max 15 per metric)
+                const max = 15;
+                clarityBar.style.width = `${(scores.clarity / max * 100)}%`;
+                confidenceBar.style.width = `${(scores.confidence / max * 100)}%`;
+                diplomacyBar.style.width = `${(scores.diplomacy / max * 100)}%`;
+                influenceBar.style.width = `${(scores.influence / max * 100)}%`;
+
+                clarityScore.textContent = scores.clarity;
+                confidenceScore.textContent = scores.confidence;
+                diplomacyScore.textContent = scores.diplomacy;
+                influenceScore.textContent = scores.influence;
+
+                // Determine persona
+                const maxScore = Math.max(scores.clarity, scores.confidence, scores.diplomacy, scores.influence);
+                let persona = '';
+                if (scores.clarity === maxScore) persona = 'Clear Communicator';
+                else if (scores.confidence === maxScore) persona = 'Bold Speaker';
+                else if (scores.diplomacy === maxScore) persona = 'Master Diplomat';
+                else persona = 'Influential Negotiator';
+
+                personaTitle.textContent = persona;
+
+                // Strengths and Improvements (example based on scores)
+                strengthsList.innerHTML = '<li>Strong in high-scoring areas</li><li>Balanced decision-making</li>';
+                improvementsList.innerHTML = '<li>Focus on lower-scoring metrics</li><li>Practice more scenarios</li>';
+            }, 100);
+        }
+
+        restartBtn.addEventListener('click', () => {
+            scores = { clarity: 0, confidence: 0, diplomacy: 0, influence: 0 };
+            currentScenario = 0;
+            summaryCard.style.opacity = '0';
+            setTimeout(() => {
+                summaryCard.classList.add('hidden');
+                scenarioCard.classList.remove('hidden');
+                showScenario();
+            }, 500);
+        });
+
+        // Initial load
+        showScenario();
+    </script>
+</body>
+</html>
