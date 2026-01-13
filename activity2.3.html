@@ -12,6 +12,7 @@
             padding: 20px;
             color: #333;
             min-height: 100vh;
+            overflow-x: hidden;
         }
         .container {
             max-width: 900px;
@@ -20,6 +21,7 @@
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             overflow: hidden;
+            position: relative;
         }
         header {
             background: #1e40af;
@@ -70,6 +72,7 @@
             padding: 40px;
             min-height: 500px;
             text-align: center;
+            position: relative;
         }
         .gate {
             background: #f8f9fa;
@@ -91,6 +94,10 @@
             cursor: pointer;
             transition: all 0.3s;
             font-size: 18px;
+        }
+        .checklist li.selected {
+            background: #bbdefb;
+            border-left: 5px solid #3b82f6;
         }
         .checklist li.correct {
             background: #d4edda;
@@ -114,6 +121,7 @@
             border-radius: 10px;
             display: inline-block;
             cursor: grab;
+            user-select: none;
         }
         .drag-item.dragging {
             opacity: 0.5;
@@ -124,6 +132,14 @@
             border-radius: 15px;
             min-height: 150px;
             margin: 20px 0;
+            border: 2px dashed #f59e0b;
+        }
+        .folder-item {
+            background: #fefce8;
+            padding: 12px;
+            margin: 8px;
+            border-radius: 8px;
+            display: inline-block;
         }
         .behavior-option {
             background: #f0f4f8;
@@ -132,11 +148,18 @@
             border-radius: 10px;
             cursor: pointer;
             font-size: 18px;
+            transition: all 0.3s;
+        }
+        .behavior-option.selected {
+            background: #bbdefb;
+            border-left: 5px solid #3b82f6;
         }
         .behavior-option.good {
+            background: #d4edda;
             border-left: 5px solid #10b981;
         }
         .behavior-option.bad {
+            background: #fce7e7;
             border-left: 5px solid #ef4444;
         }
         .btn {
@@ -164,6 +187,8 @@
             padding: 60px 20px;
             text-align: center;
             font-size: 28px;
+            position: relative;
+            overflow: hidden;
         }
         .access-granted {
             color: #10b981;
@@ -174,6 +199,15 @@
         .hidden {
             display: none;
         }
+        #confetti-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
@@ -181,20 +215,18 @@
         <header>
             <h1>MUN Readiness Simulator</h1>
         </header>
-
         <div class="progress-bar">
-            <div class="stage-dot" id="stage1">1</div>
+            <div class="stage-dot current" id="stage1">1</div>
             <div class="stage-dot locked" id="stage2">2</div>
             <div class="stage-dot locked" id="stage3">3</div>
             <div class="stage-dot locked" id="stage4">4</div>
         </div>
-
         <div class="main-area">
             <!-- Stage 1: Registration Gate -->
             <div id="stage-1">
                 <div class="gate">
                     <h2 style="color: #1e40af;">Registration Gate</h2>
-                    <p>The Chair checks your registration status. Click on everything you have completed:</p>
+                    <p>The Chair checks your registration status. Click to select what you have completed:</p>
                     <ul class="checklist">
                         <li data-correct="true">Found a conference and registered online</li>
                         <li data-correct="true">Paid the registration fee</li>
@@ -213,7 +245,7 @@
                     <h2 style="color: #1e40af;">Assignment Check</h2>
                     <p>You have been assigned:</p>
                     <p style="font-size: 24px; font-weight: bold; color: #3b82f6;">France – General Assembly</p>
-                    <p>What is the most important next step?</p>
+                    <p>What is the most important next step? Click to select:</p>
                     <div style="margin: 30px 0;">
                         <div class="behavior-option" data-correct="true">Research France's position on the agenda topics</div>
                         <div class="behavior-option" data-correct="false">Write my opening speech immediately</div>
@@ -230,13 +262,13 @@
                 <div class="gate">
                     <h2 style="color: #1e40af;">Delegate Preparation Desk</h2>
                     <p>Drag only the essential preparation items into your Delegate Folder.</p>
-                    <div style="display: flex; justify-content: center; flex-wrap: wrap; margin: 30px 0;">
-                        <div class="drag-item" draggable="true">Country research notes</div>
-                        <div class="drag-item" draggable="true">Opening speech draft</div>
-                        <div class="drag-item" draggable="true">MUN rules of procedure</div>
-                        <div class="drag-item" draggable="true">Casual clothes</div>
-                        <div class="drag-item" draggable="true">Position paper</div>
-                        <div class="drag-item" draggable="true">Social media posts</div>
+                    <div style="display: flex; justify-content: center; flex-wrap: wrap; margin: 30px 0;" id="drag-items">
+                        <div class="drag-item" draggable="true" data-type="research">Country research notes</div>
+                        <div class="drag-item" draggable="true" data-type="speech">Opening speech draft</div>
+                        <div class="drag-item" draggable="true" data-type="rules">MUN rules of procedure</div>
+                        <div class="drag-item" draggable="true" data-type="casual">Casual clothes</div>
+                        <div class="drag-item" draggable="true" data-type="position">Position paper</div>
+                        <div class="drag-item" draggable="true" data-type="social">Social media posts</div>
                     </div>
                     <div class="folder" id="delegate-folder">
                         <p>Delegate Folder – Drop items here</p>
@@ -250,7 +282,7 @@
             <div id="stage-4" class="hidden">
                 <div class="gate">
                     <h2 style="color: #1e40af;">Confidence & Conduct Scan</h2>
-                    <p>Choose the behaviors that show you are ready for MUN decorum and confidence:</p>
+                    <p>Click to select behaviors that show you are ready for MUN decorum and confidence:</p>
                     <div style="margin: 30px 0;">
                         <div class="behavior-option" data-good="true">Dress in formal Western business attire</div>
                         <div class="behavior-option" data-good="true">Listen respectfully even when I disagree</div>
@@ -259,15 +291,17 @@
                         <div class="behavior-option" data-good="false">Interrupt others frequently</div>
                         <div class="behavior-option" data-good="true">Be open to negotiating and compromising</div>
                     </div>
-                    <button class="btn" id="final-check">Request Conference Entry</button>
+                    <button class="btn" id="submit-conduct">Submit Behaviors</button>
+                    <p id="conduct-feedback" style="margin-top: 20px; font-size: 18px;"></p>
                 </div>
             </div>
 
             <!-- Final Result -->
             <div id="result" class="result hidden">
-                <h2 id="result-title" style="font-size: 40px; margin: 30px 0;"></h2>
-                <p id="result-message" style="font-size: 22px; max-width: 700px; margin: 0 auto 40px;"></p>
-                <button class="btn" onclick="location.reload()">Try Again</button>
+                <canvas id="confetti-canvas"></canvas>
+                <h2 id="result-title" style="font-size: 40px; margin: 30px 0; position: relative; z-index: 2;"></h2>
+                <p id="result-message" style="font-size: 22px; max-width: 700px; margin: 0 auto 40px; position: relative; z-index: 2;"></p>
+                <button class="btn" onclick="location.reload()" style="position: relative; z-index: 2;">Try Again</button>
             </div>
         </div>
     </div>
@@ -277,20 +311,46 @@
         let stagesCompleted = 0;
         const totalStages = 4;
 
-        // Stage 1: Registration
+        // Helper: Update progress circles
+        function updateProgress() {
+            for (let i = 1; i <= totalStages; i++) {
+                const dot = document.getElementById(`stage${i}`);
+                if (i <= stagesCompleted) {
+                    dot.classList.remove('locked');
+                    dot.classList.add('completed');
+                } else if (i === stagesCompleted + 1) {
+                    dot.classList.remove('locked');
+                    dot.classList.add('current');
+                }
+            }
+        }
+
+        // Stage 1: Registration Gate
+        document.querySelectorAll('#stage-1 .checklist li').forEach(li => {
+            li.addEventListener('click', () => {
+                li.classList.toggle('selected');
+            });
+        });
+
         document.getElementById('check-registration').addEventListener('click', () => {
             const items = document.querySelectorAll('#stage-1 .checklist li');
             let correctCount = 0;
+            let selectedCount = 0;
+
             items.forEach(item => {
-                if (item.dataset.correct === 'true') {
-                    item.classList.add('correct');
-                    correctCount++;
-                } else {
-                    item.classList.add('incorrect');
+                if (item.classList.contains('selected')) {
+                    selectedCount++;
+                    if (item.dataset.correct === 'true') {
+                        item.classList.add('correct');
+                        correctCount++;
+                    } else {
+                        item.classList.add('incorrect');
+                    }
                 }
             });
+
             const feedback = document.getElementById('registration-feedback');
-            if (correctCount === 3) {
+            if (selectedCount > 0 && correctCount === 3) {
                 feedback.textContent = "Registration complete! Proceeding to assignment...";
                 feedback.style.color = '#10b981';
                 stagesCompleted++;
@@ -300,57 +360,84 @@
                     document.getElementById('stage-2').classList.remove('hidden');
                 }, 2000);
             } else {
-                feedback.textContent = "Some items missing or incorrect. Fix and try again.";
+                feedback.textContent = "Make sure you selected the correct items and nothing extra.";
                 feedback.style.color = '#ef4444';
             }
         });
 
-        // Stage 2: Assignment
+        // Stage 2: Assignment Check
         document.querySelectorAll('#stage-2 .behavior-option').forEach(opt => {
             opt.addEventListener('click', function() {
-                document.querySelectorAll('#stage-2 .behavior-option').forEach(o => o.style.pointerEvents = 'none');
-                if (this.dataset.correct === 'true') {
-                    this.style.background = '#d4edda';
-                    document.getElementById('assignment-feedback').textContent = "Correct! Research is the key next step.";
-                    document.getElementById('assignment-feedback').style.color = '#10b981';
-                    stagesCompleted++;
-                    updateProgress();
-                    setTimeout(() => {
-                        document.getElementById('stage-2').classList.add('hidden');
-                        document.getElementById('stage-3').classList.remove('hidden');
-                    }, 2000);
-                } else {
-                    this.style.background = '#fce7e7';
-                    document.getElementById('assignment-feedback').textContent = "Not yet. The most important step is thorough research.";
-                    document.getElementById('assignment-feedback').style.color = '#ef4444';
-                }
+                document.querySelectorAll('#stage-2 .behavior-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
             });
         });
 
-        // Stage 3: Preparation Drag & Drop
-        const dragItems = document.querySelectorAll('.drag-item');
+        document.getElementById('check-assignment').addEventListener('click', () => {
+            const selected = document.querySelector('#stage-2 .behavior-option.selected');
+            const feedback = document.getElementById('assignment-feedback');
+
+            if (!selected) {
+                feedback.textContent = "Please select one option first.";
+                feedback.style.color = '#ef4444';
+                return;
+            }
+
+            if (selected.dataset.correct === 'true') {
+                selected.classList.add('correct');
+                feedback.textContent = "Correct! Research is the key next step.";
+                feedback.style.color = '#10b981';
+                stagesCompleted++;
+                updateProgress();
+                setTimeout(() => {
+                    document.getElementById('stage-2').classList.add('hidden');
+                    document.getElementById('stage-3').classList.remove('hidden');
+                }, 2000);
+            } else {
+                selected.classList.add('incorrect');
+                feedback.textContent = "Not yet. The most important step is thorough research.";
+                feedback.style.color = '#ef4444';
+            }
+        });
+
+        // Stage 3: Preparation Drag & Drop (improved)
+        const dragItems = document.querySelectorAll('#stage-3 .drag-item');
         const folder = document.getElementById('delegate-folder');
+        const requiredTypes = ['research', 'speech', 'rules', 'position'];
 
         dragItems.forEach(item => {
-            item.addEventListener('dragstart', () => item.classList.add('dragging'));
-            item.addEventListener('dragend', () => item.classList.remove('dragging'));
+            item.addEventListener('dragstart', () => {
+                item.classList.add('dragging');
+            });
+            item.addEventListener('dragend', () => {
+                item.classList.remove('dragging');
+            });
         });
 
         folder.addEventListener('dragover', e => e.preventDefault());
         folder.addEventListener('drop', e => {
             e.preventDefault();
             const dragged = document.querySelector('.dragging');
-            if (dragged.textContent.includes('research') || dragged.textContent.includes('speech') || dragged.textContent.includes('procedure') || dragged.textContent.includes('Position paper')) {
-                folder.appendChild(dragged);
+            if (dragged) {
+                const clone = dragged.cloneNode(true);
+                clone.classList.remove('dragging');
+                clone.style.cursor = 'default';
+                clone.draggable = false;
+                folder.appendChild(clone);
+                dragged.remove(); // Remove original
             }
         });
 
         document.getElementById('check-preparation').addEventListener('click', () => {
-            const required = ['Country research notes', 'Opening speech draft', 'MUN rules of procedure', 'Position paper'];
-            const inFolder = Array.from(folder.children).filter(child => child.classList.contains('drag-item')).map(child => child.textContent);
-            const hasAll = required.every(item => inFolder.includes(item));
+            const itemsInFolder = folder.querySelectorAll('.drag-item');
+            const typesInFolder = Array.from(itemsInFolder).map(item => item.dataset.type);
+
+            const hasAllRequired = requiredTypes.every(type => typesInFolder.includes(type));
+            const noExtras = typesInFolder.length === requiredTypes.length;
+
             const feedback = document.getElementById('preparation-feedback');
-            if (hasAll && inFolder.length === required.length) {
+
+            if (hasAllRequired && noExtras) {
                 feedback.textContent = "Excellent preparation! Folder complete.";
                 feedback.style.color = '#10b981';
                 stagesCompleted++;
@@ -365,42 +452,52 @@
             }
         });
 
-        // Stage 4: Conduct
-        let goodChoices = 0;
+        // Stage 4: Confidence & Conduct Scan
         document.querySelectorAll('#stage-4 .behavior-option').forEach(opt => {
             opt.addEventListener('click', function() {
-                if (this.dataset.good === 'true') {
-                    this.classList.add('good');
-                    goodChoices++;
-                } else {
-                    this.classList.add('bad');
-                }
-                this.style.pointerEvents = 'none';
+                this.classList.toggle('selected');
             });
         });
 
-        document.getElementById('final-check').addEventListener('click', () => {
-            const result = document.getElementById('result');
-            const title = document.getElementById('result-title');
-            const message = document.getElementById('result-message');
+        document.getElementById('submit-conduct').addEventListener('click', () => {
+            const selected = document.querySelectorAll('#stage-4 .behavior-option.selected');
+            let goodCount = 0;
+            let totalSelected = selected.length;
 
-            document.getElementById('stage-4').classList.add('hidden');
+            selected.forEach(opt => {
+                if (opt.dataset.good === 'true') {
+                    goodCount++;
+                    opt.classList.add('good');
+                } else {
+                    opt.classList.add('bad');
+                }
+            });
 
-            if (stagesCompleted === totalStages && goodChoices >= 4) {
-                title.textContent = "Access Granted!";
-                title.classList.add('access-granted');
-                message.innerHTML = "Welcome to the Conference Hall!<br><br>You are fully prepared and ready to represent your country with confidence and professionalism.";
+            const feedback = document.getElementById('conduct-feedback');
+
+            if (totalSelected >= 4 && goodCount >= 4) {
+                feedback.textContent = "Excellent conduct and confidence! Ready to enter.";
+                feedback.style.color = '#10b981';
+                stagesCompleted++;
+                updateProgress();
+                setTimeout(() => {
+                    document.getElementById('stage-4').classList.add('hidden');
+                    document.getElementById('result').classList.remove('hidden');
+                    document.getElementById('result-title').textContent = "Access Granted!";
+                    document.getElementById('result-title').classList.add('access-granted');
+                    document.getElementById('result-message').innerHTML = "Welcome to the Conference Hall!<br><br>You are fully prepared and ready to represent your country with confidence and professionalism.";
+
+                    // Trigger confetti + sound
+                    triggerVictory();
+                }, 2000);
             } else {
-                title.textContent = "Preparation Incomplete";
-                title.classList.add('access-denied');
-                message.innerHTML = "The Chair has noted gaps in your readiness.<br><br>Review the stages, complete all requirements properly, and try again. Every great delegate started by learning these steps!";
+                feedback.textContent = "Some selections do not match MUN decorum. Try again.";
+                feedback.style.color = '#ef4444';
             }
-
-            result.classList.remove('hidden');
         });
 
         function updateProgress() {
-            for (let i = 1; i <= totalStages; i++) {
+            for (let i = 1; i <= 4; i++) {
                 const dot = document.getElementById(`stage${i}`);
                 if (i <= stagesCompleted) {
                     dot.classList.remove('locked');
@@ -411,7 +508,79 @@
                 }
             }
         }
+
+        // Confetti + Sound on Success
+        function triggerVictory() {
+            const canvas = document.createElement('canvas');
+            canvas.id = 'confetti-canvas';
+            canvas.style.position = 'fixed';
+            canvas.style.top = '0';
+            canvas.style.left = '0';
+            canvas.style.pointerEvents = 'none';
+            canvas.style.zIndex = '9999';
+            document.body.appendChild(canvas);
+
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const confetti = [];
+            const colors = ['#10b981', '#3b82f6', '#ef4444', '#f59e0b', '#8b5cf6'];
+
+            for (let i = 0; i < 150; i++) {
+                confetti.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    r: Math.random() * 6 + 2,
+                    d: Math.random() * 150 + 50,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    tilt: Math.random() * 10 - 5,
+                    tiltAngle: 0
+                });
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                confetti.forEach((c, i) => {
+                    c.tiltAngle += 0.1;
+                    c.y += (Math.cos(c.d) + 3 + c.r / 2) / 2;
+                    c.tilt = Math.sin(c.tiltAngle) * 15;
+
+                    if (c.y > canvas.height) {
+                        confetti.splice(i, 1);
+                    } else {
+                        ctx.beginPath();
+                        ctx.lineWidth = c.r;
+                        ctx.strokeStyle = c.color;
+                        ctx.moveTo(c.x + c.tilt + c.r / 4, c.y);
+                        ctx.lineTo(c.x + c.tilt, c.y + c.tilt + c.r / 4);
+                        ctx.stroke();
+                    }
+                });
+
+                if (confetti.length > 0) {
+                    requestAnimationFrame(draw);
+                } else {
+                    canvas.remove();
+                }
+            }
+
+            draw();
+
+            // Play celebration sound
+            const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3');
+            audio.volume = 0.6;
+            audio.play().catch(() => console.log("Audio autoplay blocked - user interaction required"));
+        }
+
+        // Resize canvas on window resize
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('confetti-canvas');
+            if (canvas) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+        });
     </script>
 </body>
-
 </html>
