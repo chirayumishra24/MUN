@@ -30,7 +30,7 @@
 
     <div id="activity-container" class="w-full max-w-2xl">
 
-        <!-- Progress Bar -->
+        <!-- Progress Bar (visible throughout) -->
         <div id="progress-bar" class="w-full h-2 bg-progressBg rounded-full mb-8 overflow-hidden">
             <div id="progress-fill" class="h-full bg-progressFill transition-all duration-500" style="width: 0%;"></div>
         </div>
@@ -45,7 +45,7 @@
         </div>
 
         <!-- Scenario Card -->
-        <div id="scenario-card" class="bg-cardBg backdrop-blur-lg border border-white/40 rounded-3xl shadow-2xl p-10 text-center transition-all duration-600 hidden opacity-0 scale-95">
+        <div id="scenario-card" class="hidden bg-cardBg backdrop-blur-lg border border-white/40 rounded-3xl shadow-2xl p-10 text-center transition-all duration-600 opacity-0 scale-95">
             <h2 class="text-3xl font-bold text-textPrimary mb-8">Scenario <span id="scenario-number"></span></h2>
             <p id="situation-text" class="text-xl text-gray-800 mb-12 leading-relaxed min-h-[120px]"></p>
             <div id="choices-container" class="flex flex-col gap-5"></div>
@@ -61,46 +61,14 @@
                 <div id="ai-review" class="text-left text-lg text-gray-800 bg-white/60 p-6 rounded-2xl shadow-inner whitespace-pre-wrap min-h-[200px]"></div>
             </div>
 
-            <div class="grid grid-cols-2 gap-6 mb-10">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
                 <div>
-                    <h3 class="text-xl font-bold text-textPrimary mb-3">Strengths</h3>
-                    <ul id="strengths-list" class="list-disc list-inside text-gray-700 text-left"></ul>
+                    <h3 class="text-xl font-bold text-textPrimary mb-4">Strengths</h3>
+                    <ul id="strengths-list" class="list-disc list-inside text-gray-700 text-left text-lg"></ul>
                 </div>
                 <div>
-                    <h3 class="text-xl font-bold text-textPrimary mb-3">Growth Areas</h3>
-                    <ul id="improvements-list" class="list-disc list-inside text-gray-700 text-left"></ul>
-                </div>
-            </div>
-
-            <div class="space-y-4 mb-12">
-                <h3 class="text-2xl font-bold text-textPrimary mb-4">Score Breakdown</h3>
-                <div class="flex items-center gap-4">
-                    <span class="w-32 text-right font-medium">Clarity</span>
-                    <div class="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
-                        <div id="clarity-bar" class="h-full bg-blue-500 transition-all duration-1000"></div>
-                    </div>
-                    <span id="clarity-score" class="w-16 font-bold"></span>
-                </div>
-                <div class="flex items-center gap-4">
-                    <span class="w-32 text-right font-medium">Confidence</span>
-                    <div class="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
-                        <div id="confidence-bar" class="h-full bg-green-500 transition-all duration-1000"></div>
-                    </div>
-                    <span id="confidence-score" class="w-16 font-bold"></span>
-                </div>
-                <div class="flex items-center gap-4">
-                    <span class="w-32 text-right font-medium">Diplomacy</span>
-                    <div class="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
-                        <div id="diplomacy-bar" class="h-full bg-purple-500 transition-all duration-1000"></div>
-                    </div>
-                    <span id="diplomacy-score" class="w-16 font-bold"></span>
-                </div>
-                <div class="flex items-center gap-4">
-                    <span class="w-32 text-right font-medium">Influence</span>
-                    <div class="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
-                        <div id="influence-bar" class="h-full bg-orange-500 transition-all duration-1000"></div>
-                    </div>
-                    <span id="influence-score" class="w-16 font-bold"></span>
+                    <h3 class="text-xl font-bold text-textPrimary mb-4">Growth Areas</h3>
+                    <ul id="improvements-list" class="list-disc list-inside text-gray-700 text-left text-lg"></ul>
                 </div>
             </div>
 
@@ -176,7 +144,6 @@
             setTimeout(() => {
                 startScreen.classList.add('hidden');
                 scenarioCard.classList.remove('hidden');
-                // Force reflow + trigger animation
                 void scenarioCard.offsetWidth;
                 scenarioCard.classList.add('opacity-100', 'scale-100');
                 showScenario();
@@ -185,14 +152,13 @@
 
         function showScenario() {
             if (currentScenario >= scenarios.length) {
-                // Force 100% progress when all scenarios answered
                 progressFill.style.width = '100%';
                 scenarioCard.classList.add('fade-out');
                 setTimeout(() => {
                     scenarioCard.classList.add('hidden');
                     generateAIReview().then(() => {
                         summaryCard.classList.remove('hidden');
-                        void summaryCard.offsetWidth; // force reflow
+                        void summaryCard.offsetWidth;
                         summaryCard.classList.add('opacity-100', 'scale-100');
                     });
                 }, 600);
@@ -240,8 +206,7 @@
         }
 
         function updateProgress() {
-            // Progress based on completed scenarios (0% to 100%)
-            const progress = (currentScenario / scenarios.length) * 100;
+            const progress = Math.min(100, (currentScenario / scenarios.length) * 100);
             progressFill.style.width = `${progress}%`;
         }
 
@@ -249,6 +214,7 @@
             const apiKey = GROQ_API_KEY;
             if (!apiKey || apiKey.includes('XXXX')) {
                 document.getElementById('ai-review').innerHTML = "<strong>AI review unavailable</strong><br>Add your real Groq API key in the code.";
+                populateStaticSummary();
                 return;
             }
 
@@ -261,13 +227,16 @@ Scenario ${i+1}: ${c.situation}
 Choice: ${c.chosen}
 `).join('\n')}
 
-Write a warm, encouraging 200-300 word review in first person as if speaking directly to the student.
-- Celebrate what they did well (based on high-scoring areas like clarity, confidence, diplomacy, influence)
-- Gently point out 1-2 growth areas (lower-scoring domains)
-- Give 1-2 specific, actionable tips for improvement
-- End with strong motivational encouragement
+Output ONLY valid JSON in this exact format (nothing before or after):
 
-Tone: supportive, professional, kind, inspiring.
+{
+  "persona": "Persona Title (e.g. Master Diplomat)",
+  "review": "200-300 word warm, encouraging review in first person",
+  "strengths": ["Strength 1", "Strength 2", "Strength 3"],
+  "improvements": ["Improvement 1", "Improvement 2"]
+}
+
+Base everything on the student's actual choices and their impact on clarity, confidence, diplomacy, influence.
             `;
 
             try {
@@ -281,42 +250,42 @@ Tone: supportive, professional, kind, inspiring.
                         model: "llama-3.3-70b-versatile",
                         messages: [{ role: "user", content: prompt }],
                         temperature: 0.7,
-                        max_tokens: 450
+                        max_tokens: 600
                     })
                 });
 
                 if (!response.ok) throw new Error("API error");
 
                 const data = await response.json();
-                const review = data.choices[0].message.content.trim();
-                document.getElementById('ai-review').textContent = review;
+                const content = data.choices[0].message.content.trim();
+
+                const jsonMatch = content.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    const parsed = JSON.parse(jsonMatch[0]);
+
+                    document.getElementById('persona-title').textContent = parsed.persona;
+                    document.getElementById('ai-review').textContent = parsed.review;
+
+                    // Dynamic strengths & improvements from AI
+                    const strengthsList = document.getElementById('strengths-list');
+                    strengthsList.innerHTML = parsed.strengths.map(s => `<li>${s}</li>`).join('');
+
+                    const improvementsList = document.getElementById('improvements-list');
+                    improvementsList.innerHTML = parsed.improvements.map(i => `<li>${i}</li>`).join('');
+                } else {
+                    throw new Error("No valid JSON");
+                }
             } catch (err) {
                 document.getElementById('ai-review').innerHTML = "<strong>Failed to connect to AI coach.</strong><br>Check your API key and internet connection.";
+                populateStaticSummary();
             }
         }
 
-        function showSummary() {
-            // Normalize scores (max 3 × 5 = 15)
-            const max = 15;
-            document.getElementById('clarity-bar').style.width = `${Math.min(100, (scores.clarity / max * 100))}%`;
-            document.getElementById('confidence-bar').style.width = `${Math.min(100, (scores.confidence / max * 100))}%`;
-            document.getElementById('diplomacy-bar').style.width = `${Math.min(100, (scores.diplomacy / max * 100))}%`;
-            document.getElementById('influence-bar').style.width = `${Math.min(100, (scores.influence / max * 100))}%`;
-
-            document.getElementById('clarity-score').textContent = scores.clarity;
-            document.getElementById('confidence-score').textContent = scores.confidence;
-            document.getElementById('diplomacy-score').textContent = scores.diplomacy;
-            document.getElementById('influence-score').textContent = scores.influence;
-
-            // Persona
-            const maxScore = Math.max(...Object.values(scores));
-            let persona = "Balanced Negotiator";
-            if (scores.diplomacy === maxScore) persona = "Master Diplomat";
-            if (scores.confidence === maxScore) persona = "Bold Speaker";
-            if (scores.influence === maxScore) persona = "Influential Leader";
-            if (scores.clarity === maxScore) persona = "Clear Communicator";
-
-            document.getElementById('persona-title').textContent = persona;
+        function populateStaticSummary() {
+            document.getElementById('persona-title').textContent = "Balanced Negotiator";
+            document.getElementById('ai-review').textContent = "Great effort! You showed solid decision-making throughout the simulation.";
+            document.getElementById('strengths-list').innerHTML = "<li>Good overall balance</li><li>Thoughtful choices</li><li>Potential to grow</li>";
+            document.getElementById('improvements-list').innerHTML = "<li>Focus on confidence</li><li>Practice diplomacy more</li>";
         }
 
         document.getElementById('restart-btn').addEventListener('click', () => {
@@ -324,6 +293,7 @@ Tone: supportive, professional, kind, inspiring.
             userChoices = [];
             currentScenario = 0;
             summaryCard.classList.add('fade-out');
+            progressFill.style.width = '0%';
             setTimeout(() => {
                 summaryCard.classList.add('hidden');
                 document.getElementById('ai-review').textContent = '';
