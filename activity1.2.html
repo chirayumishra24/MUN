@@ -79,8 +79,9 @@
                     <div id="feedback-phase1" class="mt-12 hidden">
                         <div class="bg-blue-50 rounded-2xl p-8 border-l-8 border-secondary">
                             <h3 class="text-2xl font-bold text-primary mb-4">
-                                <i class="fas fa-lightbulb mr-3"></i>AI Feedback for This Question
-                            </h3>
+    Reflection
+</h3>
+
                             <div class="text-lg leading-relaxed" id="text-phase1"></div>
                         </div>
                     </div>
@@ -200,13 +201,6 @@
                     <p class="text-6xl font-bold" id="final-score-display">0 / 40</p>
                     <p class="text-2xl mt-6" id="score-message"></p>
                 </div>
-
-                <div class="text-center mb-10">
-                    <button onclick="downloadWord()" class="bg-green-600 hover:bg-green-700 text-white text-2xl font-bold px-12 py-6 rounded-full shadow-lg transition transform hover:scale-105">
-                        <i class="fas fa-file-word mr-4"></i>Download Your Full Report (Word .doc)
-                    </button>
-                </div>
-
                 <button onclick="restartGame()" class="bg-gray-600 hover:bg-gray-700 text-white text-2xl font-bold px-12 py-6 rounded-full shadow-lg transition">
                     Play Again
                 </button>
@@ -270,10 +264,19 @@
                 setTimeout(() => {
                     const current = document.querySelector('.phase:not(.hidden)');
                     current.classList.add('hidden');
-                    if (phaseId === 'phase4') {
-                        prepareFinalReport();
-                        document.getElementById('results').classList.remove('hidden');
-                    } else {
+if (phaseId === 'phase4') {
+    document.getElementById('final-score-display').textContent = `${score} / 40`;
+
+    const message =
+        score >= 35 ? "Outstanding alignment with MUN values!" :
+        score >= 25 ? "Excellent potential as a delegate!" :
+        score >= 15 ? "A strong foundation to build on!" :
+        "A great starting point for growth!";
+
+    document.getElementById('score-message').textContent = message;
+    document.getElementById('results').classList.remove('hidden');
+}
+ else {
                         const nextPhase = `phase${parseInt(phaseId.replace('phase', '')) + 1}`;
                         document.getElementById(nextPhase).classList.remove('hidden');
                     }
@@ -281,50 +284,53 @@
             });
         });
 
-        async function getPerQuestionFeedback(phaseId, choice, points) {
-            const phaseTitles = {
-                phase1: "What excites you most about your future?",
-                phase2: "When faced with a tough challenge...",
-                phase3: "In a group discussion...",
-                phase4: "Your biggest goal right now is..."
-            };
+       async function getPerQuestionFeedback(phaseId, choice, points) {
+    const phaseTitles = {
+        phase1: "What excites you most about your future?",
+        phase2: "When faced with a tough challenge...",
+        phase3: "In a group discussion...",
+        phase4: "Your biggest goal right now is..."
+    };
 
-            const prompt = `You are a warm, encouraging MUN coach giving immediate feedback to a high school student.
+    const prompt = `You are a Model United Nations coach giving brief feedback.
 
 Question: ${phaseTitles[phaseId]}
-Student chose: "${choice}" (earned ${points}/10 points)
+Student chose: "${choice}"
 
-In 100-150 words:
-- Celebrate what was good about their choice
-- If they didn't get full points, gently explain why a more MUN-aligned choice would earn more
-- Give one clear tip on how to think/act more like a successful MUN delegate in this situation
-- End positively
+Write a realistic reflection in **no more than 50 words**:
+- One strength of the choice
+- One suggestion for improvement
+- Encouraging, neutral tone
+- Do NOT mention AI or tools`;
 
-Tone: supportive and motivating.`;
+    try {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${GROQ_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: GROQ_MODEL,
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.6,
+                max_tokens: 120
+            })
+        });
 
-            try {
-                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${GROQ_API_KEY}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        model: GROQ_MODEL,
-                        messages: [{ role: 'user', content: prompt }],
-                        temperature: 0.7,
-                        max_tokens: 300
-                    })
-                });
+        if (!response.ok) throw new Error();
 
-                if (!response.ok) throw new Error();
+        const data = await response.json();
+        return data.choices[0].message.content.trim();
 
-                const data = await response.json();
-                return data.choices[0].message.content.trim();
-            } catch (err) {
-                return `Great choice! You earned ${points} points. Higher points come from choices that show leadership, collaboration, preparation, and global-mindedness — the heart of MUN. Keep going!`;
-            }
-        }
+    } catch (err) {
+        // Natural fallback (≤ 40 words)
+        return points >= 10
+            ? "This choice reflects strong alignment with MUN values like leadership and cooperation. Continue developing confidence and awareness of others’ perspectives to grow further."
+            : "This response shows honest self-awareness. In MUN, choices that emphasize preparation, collaboration, and engagement usually lead to stronger outcomes.";
+    }
+}
+
 
         function prepareFinalReport() {
             document.getElementById('final-score-display').textContent = `${score} / 40`;
@@ -335,63 +341,6 @@ Tone: supportive and motivating.`;
 
             document.getElementById('score-message').textContent = message;
 
-            // Build content for Word document
-            let html = `
-                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-                <head><meta charset='utf-8'><title>MUN Future Quest Report</title>
-                <style>
-                    body { font-family: Arial, sans-serif; padding: 40px; line-height: 1.6; }
-                    h1 { text-align: center; color: #1e40af; }
-                    h2 { color: #3b82f6; }
-                    h3 { color: #1e40af; }
-                    .feedback { background: #f0f9ff; padding: 15px; border-left: 4px solid #3b82f6; margin: 20px 0; }
-                </style>
-                </head>
-                <body>
-                    <h1>MUN Future Quest Report</h1>
-                    <p style="text-align: center;">Date: ${new Date().toLocaleDateString('en-GB')}</p>
-                    <hr>
-                    <h2>Your Final Growth Score: ${score}/40</h2>
-                    <p style="font-size: 18px; color: #10b981;"><strong>${message}</strong></p>
-                    <h2>Your Journey & Feedback</h2>
-            `;
-
-            choicesLog.forEach((c, i) => {
-                const phaseNum = i + 1;
-                const feedback = document.getElementById(`text-phase${phaseNum}`).innerHTML;
-                html += `
-                    <h3>Phase ${phaseNum}</h3>
-                    <p><strong>Your choice:</strong> ${c.choice} (+${c.points} points)</p>
-                    <div class="feedback">
-                        ${feedback}
-                    </div>
-                `;
-            });
-
-            html += `
-                    <p style="margin-top: 50px; text-align: center; color: #10b981; font-size: 20px;">
-                        <strong>You're on your way to becoming an amazing MUN delegate!</strong>
-                    </p>
-                </body>
-                </html>
-            `;
-
-            document.getElementById('word-content').innerHTML = html;
-        }
-
-        function downloadWord() {
-            const content = document.getElementById('word-content').innerHTML;
-            const blob = new Blob(['\ufeff', content], { type: 'application/msword' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `MUN_Future_Quest_Report_${new Date().toISOString().slice(0,10)}.doc`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            setTimeout(() => URL.revokeObjectURL(url), 100);
-        }
-
         function restartGame() {
             location.reload();
         }
@@ -399,5 +348,6 @@ Tone: supportive and motivating.`;
 
 </body>
 </html>
+
 
 
