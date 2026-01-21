@@ -285,6 +285,8 @@ stageResults[2] = true;
                 feedback.textContent = "Roles assigned correctly!";
                 feedback.style.color = '#10b981';
             } else {
+                stageResults[2] = false;
+
                 feedback.textContent = "Some roles are misplaced.";
                 feedback.style.color = '#ef4444';
             }
@@ -364,7 +366,6 @@ stageResults[2] = true;
         flowTarget.addEventListener('drop', e => {
             e.preventDefault();
             if (draggedItem) {
-                stageResults[4] = true;
                 flowTarget.appendChild(draggedItem);
                 draggedItem = null;
             }
@@ -396,27 +397,28 @@ stageResults[2] = true;
             document.getElementById('feedback-stage4').textContent = '';
         });
 
-        function updateProgress() {
+       function updateProgress() {
     document.querySelectorAll('.stage-dot').forEach(dot => {
         const stageNum = parseInt(dot.dataset.stage);
 
-        dot.classList.remove('bg-secondary', 'bg-gray-300', 'bg-green-500', 'text-white', 'text-gray-600');
+        dot.classList.remove(
+            'bg-secondary',
+            'bg-gray-300',
+            'bg-green-500',
+            'text-white',
+            'text-gray-600'
+        );
 
         if (stageNum < currentStage) {
-            // Completed stages
             dot.classList.add('bg-green-500', 'text-white');
-        } 
-        else if (stageNum === currentStage) {
-            // Current stage
+        } else if (stageNum === currentStage) {
             dot.classList.add('bg-secondary', 'text-white');
-        } 
-        else {
-            // Locked stages
+        } else {
             dot.classList.add('bg-gray-300', 'text-gray-600');
         }
     });
 }
-}
+
 
         function showFinalResult() {
             const correctCount = Object.values(stageResults).filter(v => v).length;
@@ -440,3 +442,4 @@ stageResults[2] = true;
 </body>
 
 </html>
+
