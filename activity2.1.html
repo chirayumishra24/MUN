@@ -251,16 +251,16 @@
             <div id="completion" class="completion hidden">
                 <i class="fas fa-medal"></i>
                 <h2 style="margin: 30px 0; font-size: 36px;">Fantastic Work!</h2>
-                <p style="font-size: 24px; max-width: 700px; margin: 0 auto 40px;">
-                    You now have a clear picture of how MUN conferences work — from registration to debates and resolutions.<br><br>
-                    You're all set to join your first conference with confidence!
-                </p>
+                <p id="final-message" style="font-size: 24px; max-width: 700px; margin: 0 auto 40px;"></p>
+
                 <button class="next-btn" onclick="location.reload()">Learn Again</button>
             </div>
         </div>
     </div>
 
     <script>
+        let score = 0;
+
         const phases = [
             {
                 title: "Phase 1: What is a MUN Conference?",
@@ -397,9 +397,10 @@
                     const feedbackDiv = document.getElementById('quiz-feedback');
 
                     if (idx === q.correct) {
-                        this.classList.add('correct');
-                        feedbackDiv.innerHTML = '<strong style="color: #10b981;">Correct! Excellent!</strong> 🎉';
-                    } else {
+    this.classList.add('correct');
+    score++; // increment score
+    feedbackDiv.innerHTML = '<strong style="color: #10b981;">Correct! Excellent!</strong> 🎉';
+ else {
                         this.classList.add('incorrect');
                         document.querySelectorAll('.quiz-option')[q.correct].classList.add('correct');
                         feedbackDiv.innerHTML = '<strong style="color: #ef4444;">Not quite.</strong> Correct answer highlighted.';
@@ -411,8 +412,19 @@
                         if (currentQuiz < quizQuestions.length) {
                             showQuizQuestion();
                         } else {
-                            quizArea.classList.add('hidden');
-                            completion.classList.remove('hidden');
+                           quizArea.classList.add('hidden');
+completion.classList.remove('hidden');
+
+const message = document.getElementById('final-message');
+
+if (score === 5) {
+    message.innerHTML = "Outstanding! 🌟 You have an excellent understanding of how MUN conferences work. You’re absolutely ready to participate with confidence.";
+} else if (score >= 3) {
+    message.innerHTML = "Great job! 👍 You understand the MUN process well. With a little more practice, you’ll be fully confident at your first conference.";
+} else {
+    message.innerHTML = "Nice effort! 💡 You’ve made a strong start. Review the phases once more and you’ll feel much more confident soon.";
+}
+
                         }
                     }, 2000);
                 });
@@ -422,6 +434,7 @@
 </body>
 
 </html>
+
 
 
 
