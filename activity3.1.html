@@ -169,6 +169,9 @@
     </main>
 
     <script>
+        
+        let currentStage = 1;
+
         // Reusable data for easy editing
         const activityData = {
             stages: 4,
@@ -216,26 +219,30 @@
         });
 
         document.getElementById('submit-stage1').addEventListener('click', () => {
-            const valid = activityData.committees.filter(c => c.valid).map(c => c.name);
-            const allCorrect = [...selectedCommittees].every(name => valid.includes(name)) && selectedCommittees.size >= 3;
-            const feedback = document.getElementById('feedback-stage1');
+    const valid = activityData.committees.filter(c => c.valid).map(c => c.name);
+    const allCorrect = [...selectedCommittees].every(name => valid.includes(name)) && selectedCommittees.size >= 3;
+    const feedback = document.getElementById('feedback-stage1');
 
-            stageResults[1] = allCorrect;
+    if (allCorrect) {
+        stageResults[1] = true;
+        currentStage = 2;
 
-            if (allCorrect) {
-                feedback.textContent = "Excellent! You selected valid MUN committees.";
-                feedback.style.color = '#10b981';
-            } else {
-                feedback.textContent = "Some committees are not typical in MUN.";
-                feedback.style.color = '#ef4444';
-            }
+        feedback.textContent = "Excellent! You selected valid MUN committees.";
+        feedback.style.color = '#10b981';
+    } else {
+        stageResults[1] = false;
 
-            updateProgress();
-            setTimeout(() => {
-                document.getElementById('stage-1').classList.add('hidden');
-                document.getElementById('stage-2').classList.remove('hidden');
-            }, 2000);
-        });
+        feedback.textContent = "Some committees are not typical in MUN.";
+        feedback.style.color = '#ef4444';
+    }
+
+    updateProgress();
+
+    setTimeout(() => {
+        document.getElementById('stage-1').classList.add('hidden');
+        document.getElementById('stage-2').classList.remove('hidden');
+    }, 2000);
+});
 
         document.getElementById('reset-stage1').addEventListener('click', () => {
             selectedCommittees.clear();
@@ -272,6 +279,9 @@
             stageResults[2] = allCorrect;
 
             if (allCorrect) {
+stageResults[2] = true;
+    currentStage = 3;
+                
                 feedback.textContent = "Roles assigned correctly!";
                 feedback.style.color = '#10b981';
             } else {
@@ -315,6 +325,9 @@
             stageResults[3] = isValid;
 
             if (isValid) {
+
+                stageResults[3] = true;
+    currentStage = 4;
                 feedback.textContent = "Appropriate agenda selected!";
                 feedback.style.color = '#10b981';
             } else {
@@ -351,6 +364,7 @@
         flowTarget.addEventListener('drop', e => {
             e.preventDefault();
             if (draggedItem) {
+                stageResults[4] = true;
                 flowTarget.appendChild(draggedItem);
                 draggedItem = null;
             }
@@ -383,19 +397,26 @@
         });
 
         function updateProgress() {
-            document.querySelectorAll('.stage-dot').forEach((dot, i) => {
-                dot.classList.remove('current', 'completed', 'locked');
-                if (i + 1 <= Object.keys(stageResults).length) {
-                    if (stageResults[i + 1]) {
-                        dot.classList.add('completed');
-                    } else {
-                        dot.classList.add('current');
-                    }
-                } else {
-                    dot.classList.add('locked');
-                }
-            });
+    document.querySelectorAll('.stage-dot').forEach(dot => {
+        const stageNum = parseInt(dot.dataset.stage);
+
+        dot.classList.remove('bg-secondary', 'bg-gray-300', 'bg-green-500', 'text-white', 'text-gray-600');
+
+        if (stageNum < currentStage) {
+            // Completed stages
+            dot.classList.add('bg-green-500', 'text-white');
+        } 
+        else if (stageNum === currentStage) {
+            // Current stage
+            dot.classList.add('bg-secondary', 'text-white');
+        } 
+        else {
+            // Locked stages
+            dot.classList.add('bg-gray-300', 'text-gray-600');
         }
+    });
+}
+}
 
         function showFinalResult() {
             const correctCount = Object.values(stageResults).filter(v => v).length;
@@ -417,4 +438,5 @@
         }
     </script>
 </body>
+
 </html>
