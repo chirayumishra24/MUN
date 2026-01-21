@@ -208,6 +208,54 @@
             pointer-events: none;
             z-index: 10;
         }
+
+        /* Cloud-style entrance animation */
+@keyframes cloudIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.7) translateY(60px);
+        filter: blur(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        filter: blur(0);
+    }
+}
+
+/* Final GIF container */
+.final-gif-wrapper {
+    position: relative;
+    margin: 40px auto 20px;
+    width: 420px;
+    animation: cloudIn 1.6s ease-out forwards;
+}
+
+/* Curved welcome text */
+.curved-text {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 420px;
+    height: 120px;
+    pointer-events: none;
+}
+
+.curved-text text {
+    font-size: 42px;
+    font-weight: 800;
+    fill: #1e40af;
+    letter-spacing: 4px;
+}
+
+/* GIF styling */
+.final-gif {
+    width: 100%;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+}
+
     </style>
 </head>
 <body>
@@ -297,13 +345,42 @@
             </div>
 
             <!-- Final Result -->
-            <div id="result" class="result hidden">
-                <canvas id="confetti-canvas"></canvas>
-                <h2 id="result-title" style="font-size: 40px; margin: 30px 0; position: relative; z-index: 2;"></h2>
-                <p id="result-message" style="font-size: 22px; max-width: 700px; margin: 0 auto 40px; position: relative; z-index: 2;"></p>
-                <button class="btn" onclick="location.reload()" style="position: relative; z-index: 2;">Try Again</button>
-            </div>
-        </div>
+<div id="result" class="result hidden">
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="final-gif-wrapper">
+
+        <!-- Curved Welcome Text -->
+        <svg class="curved-text" viewBox="0 0 500 200">
+            <path id="curvePath" d="M 50 150 Q 250 40 450 150" fill="transparent"/>
+            <text>
+                <textPath href="#curvePath" startOffset="50%" text-anchor="middle">
+                    WELCOME TO MUN
+                </textPath>
+            </text>
+        </svg>
+
+        <!-- Final GIF -->
+        <img 
+            src="/s/articles/6970a6670486a06cb65baf66/images/Going In Kids GIF by Hollyoaks.gif"
+            alt="Entering MUN Conference"
+            class="final-gif"
+        />
+
+    </div>
+
+    <h2 id="result-title" class="access-granted" style="font-size: 36px; margin-top: 20px;">
+        Access Granted!
+    </h2>
+
+    <p id="result-message" style="font-size: 22px; max-width: 700px; margin: 20px auto 40px;">
+        Welcome to the Conference Hall!<br><br>
+        You are fully prepared to represent your country with confidence, diplomacy, and professionalism.
+    </p>
+
+    <button class="btn" onclick="location.reload()">Try Again</button>
+</div>
+
     </div>
 
     <script>
@@ -584,4 +661,5 @@
     </script>
 </body>
 </html>
+
 
