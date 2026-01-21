@@ -405,11 +405,12 @@
     this.classList.add('correct');
     score++; // increment score
     feedbackDiv.innerHTML = '<strong style="color: #10b981;">Correct! Excellent!</strong> 🎉';
- else {
-                        this.classList.add('incorrect');
-                        document.querySelectorAll('.quiz-option')[q.correct].classList.add('correct');
-                        feedbackDiv.innerHTML = '<strong style="color: #ef4444;">Not quite.</strong> Correct answer highlighted.';
-                    }
+} else {
+    this.classList.add('incorrect');
+    document.querySelectorAll('.quiz-option')[q.correct].classList.add('correct');
+    feedbackDiv.innerHTML = '<strong style="color: #ef4444;">Not quite.</strong> Correct answer highlighted.';
+}
+
 
                     // Automatically go to next question after 2 seconds
                     setTimeout(() => {
@@ -439,6 +440,7 @@ if (score === 5) {
 </body>
 
 </html>
+
 
 
 
