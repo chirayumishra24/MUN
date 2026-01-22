@@ -262,184 +262,261 @@
             </div>
         </div>
     </div>
+<script>
+/* =========================
+   STATE VARIABLES
+========================= */
+let score = 0;
+let incorrectConcepts = [];
+let currentPhase = 0;
+let currentQuiz = 0;
 
-    <script>
-        let score = 0;
+/* =========================
+   PHASE CONTENT
+========================= */
+const phases = [
+  {
+    title: "Phase 1: What is a MUN Conference?",
+    alex: "Hi Jordan! I'm really excited about joining MUN, but I have no idea how conferences actually work. Can you help?",
+    jordan: "Of course, Alex! A MUN conference is a simulation where students act as diplomats from different countries. They debate global issues and try to find solutions together."
+  },
+  {
+    title: "Phase 2: Registration Process",
+    alex: "That sounds interesting! How do I sign up?",
+    jordan: "You register on the conference website, fill in your details, and pay the registration fee. This covers logistics, venue, and materials."
+  },
+  {
+    title: "Phase 3: Assignments",
+    alex: "What happens after registration?",
+    jordan: "You receive your country and committee assignment a few weeks later. Then you start researching your country's position."
+  },
+  {
+    title: "Phase 4: Preparation",
+    alex: "How do I prepare properly?",
+    jordan: "You research deeply, write a position paper, practice speeches, and plan alliances. Preparation is key to success."
+  },
+  {
+    title: "Phase 5: Conference Flow",
+    alex: "What does the actual conference look like?",
+    jordan: "Opening ceremony, committee sessions, debates, caucuses, drafting resolutions, voting, and finally the closing ceremony."
+  }
+];
 
-        const phases = [
-            {
-                title: "Phase 1: What is a MUN Conference?",
-                alex: "Hi Jordan! I'm really excited about joining MUN, but I have no idea how conferences actually work. Can you help?",
-                jordan: "Of course, Alex! I'd love to. A MUN conference is a simulation where students act as diplomats from different countries. We debate real global issues and try to find solutions together, just like in the real United Nations."
-            },
-            {
-                title: "Phase 2: Registration Process",
-                alex: "That sounds interesting! How do I even sign up for one?",
-                jordan: "Great question! First, you find a conference that fits your schedule. Then you register on their website, fill in your details, and pay the registration fee (usually $50–$100). This covers the venue, materials, and organization."
-            },
-            {
-                title: "Phase 3: Assignments",
-                alex: "Okay, I registered! What happens next?",
-                jordan: "A few weeks later, the organizers will send you your country and committee assignments. For example, you might represent Brazil in the Disarmament Committee. From there, you start researching your country's position on the topics."
-            },
-            {
-                title: "Phase 4: Preparation",
-                alex: "So after getting my country, what should I do to prepare?",
-                jordan: "You research deeply, write a position paper, practice speeches, and think about possible allies and solutions. Good preparation makes the conference way more fun and successful!"
-            },
-            {
-                title: "Phase 5: Conference Flow",
-                alex: "Finally — what does the actual conference day look like?",
-                jordan: "It starts with an opening ceremony, then committee sessions with formal speeches, informal negotiations (caucuses), drafting resolutions, and voting. It ends with a closing ceremony. It's busy, exciting, and you'll learn so much!"
-            }
-        ];
+/* =========================
+   QUIZ QUESTIONS (TAGGED)
+========================= */
+const quizQuestions = [
+  {
+    question: "What is the main purpose of a MUN conference?",
+    options: [
+      "To win awards",
+      "To simulate UN debates and solve global issues",
+      "To travel to new places",
+      "To make friends only"
+    ],
+    correct: 1,
+    concept: "Purpose of MUN"
+  },
+  {
+    question: "What is usually required to register for a MUN conference?",
+    options: [
+      "Recommendation letter",
+      "Registration form and fee",
+      "Previous MUN experience",
+      "Parent permission only"
+    ],
+    correct: 1,
+    concept: "Registration"
+  },
+  {
+    question: "When do delegates receive their country assignment?",
+    options: [
+      "On conference day",
+      "A few weeks after registration",
+      "Immediately after paying",
+      "They choose it themselves"
+    ],
+    correct: 1,
+    concept: "Assignments"
+  },
+  {
+    question: "What is an important preparation step after receiving an assignment?",
+    options: [
+      "Buying formal clothes",
+      "Researching country positions",
+      "Booking hotels",
+      "Practicing dance"
+    ],
+    correct: 1,
+    concept: "Preparation"
+  },
+  {
+    question: "What happens during committee sessions?",
+    options: [
+      "Only speeches",
+      "Debates, negotiations, drafting, and voting",
+      "Games and activities",
+      "Watching videos"
+    ],
+    correct: 1,
+    concept: "Conference Flow"
+  }
+];
 
-        const quizQuestions = [
-            {
-                question: "What is the main purpose of a MUN conference?",
-                options: ["To win awards", "To simulate UN debates and solve global issues", "To travel to new places", "To make new friends only"],
-                correct: 1
-            },
-            {
-                question: "What is usually required to register for a MUN conference?",
-                options: ["A recommendation letter", "Registration form and fee", "Previous MUN experience", "Parent permission only"],
-                correct: 1
-            },
-            {
-                question: "When do delegates typically receive their country assignment?",
-                options: ["On the conference day", "A few weeks after registration", "Immediately after paying", "Never — they choose it"],
-                correct: 1
-            },
-            {
-                question: "What is an important preparation step after receiving your assignment?",
-                options: ["Buy formal clothes", "Research your country's position on topics", "Book hotel", "Practice dancing for socials"],
-                correct: 1
-            },
-            {
-                question: "What happens during committee sessions at the conference?",
-                options: ["Only speeches", "Debates, negotiations, drafting, and voting on resolutions", "Games and activities", "Watching videos"],
-                correct: 1
-            }
-        ];
+/* =========================
+   ELEMENT REFERENCES
+========================= */
+const startScreen = document.getElementById("start-screen");
+const dynamicContent = document.getElementById("dynamic-content");
+const quizArea = document.getElementById("quiz-area");
+const completion = document.getElementById("completion");
 
-        let currentPhase = 0;
-        let currentQuiz = 0;
+const startBtn = document.getElementById("start-btn");
+const nextBtn = document.getElementById("next-btn");
 
-        const startScreen = document.getElementById('start-screen');
-        const dynamicContent = document.getElementById('dynamic-content');
-        const quizArea = document.getElementById('quiz-area');
-        const completion = document.getElementById('completion');
+const alexBubble = document.getElementById("alex-bubble");
+const jordanBubble = document.getElementById("jordan-bubble");
+const phaseTitle = document.getElementById("phase-title");
+const progress = document.getElementById("progress");
+const quizProgress = document.getElementById("quiz-progress");
 
-        const startBtn = document.getElementById('start-btn');
-        const nextBtn = document.getElementById('next-btn');
+/* =========================
+   START FLOW
+========================= */
+startBtn.addEventListener("click", () => {
+  startScreen.classList.add("hidden");
+  dynamicContent.classList.remove("hidden");
+  showPhase();
+});
 
-        const alexBubble = document.getElementById('alex-bubble');
-        const jordanBubble = document.getElementById('jordan-bubble');
-        const phaseTitle = document.getElementById('phase-title');
-        const progress = document.getElementById('progress');
-        const quizProgress = document.getElementById('quiz-progress');
+function showPhase() {
+  const phase = phases[currentPhase];
+  phaseTitle.textContent = phase.title;
+  progress.textContent = `Phase ${currentPhase + 1} of 5`;
 
-        startBtn.addEventListener('click', () => {
-            startScreen.classList.add('hidden');
-            dynamicContent.classList.remove('hidden');
-            currentPhase = 0;
-            showPhase();
-        });
+  alexBubble.classList.remove("visible");
+  jordanBubble.classList.remove("visible");
 
-        function showPhase() {
-            const phase = phases[currentPhase];
-            phaseTitle.textContent = phase.title;
-            progress.textContent = `Phase ${currentPhase + 1} of 5`;
+  setTimeout(() => {
+    alexBubble.textContent = phase.alex;
+    alexBubble.classList.add("visible");
+  }, 300);
 
-            alexBubble.classList.remove('visible');
-            jordanBubble.classList.remove('visible');
-
-            setTimeout(() => {
-                alexBubble.textContent = phase.alex;
-                alexBubble.classList.add('visible');
-            }, 300);
-
-            setTimeout(() => {
-                jordanBubble.textContent = phase.jordan;
-                jordanBubble.classList.add('visible');
-            }, 1200);
-        }
-
-        nextBtn.addEventListener('click', () => {
-            currentPhase++;
-            if (currentPhase < phases.length) {
-                showPhase();
-            } else {
-                dynamicContent.classList.add('hidden');
-                quizArea.classList.remove('hidden');
-                showQuizQuestion();
-            }
-        });
-
-        function showQuizQuestion() {
-            const q = quizQuestions[currentQuiz];
-            quizProgress.textContent = `Quiz Question ${currentQuiz + 1} of 5`;
-
-            quizArea.innerHTML = `
-                <div class="quiz-question">${q.question}</div>
-                <div class="quiz-options">
-                    ${q.options.map((opt, i) => `
-                        <div class="quiz-option" data-index="${i}">${opt}</div>
-                    `).join('')}
-                </div>
-                <div id="quiz-feedback" style="text-align: center; margin-top: 30px; font-size: 22px;"></div>
-            `;
-
-            document.querySelectorAll('.quiz-option').forEach(opt => {
-                opt.addEventListener('click', function() {
-                    // Disable all options
-                    document.querySelectorAll('.quiz-option').forEach(o => {
-                        o.style.pointerEvents = 'none';
-                        o.style.cursor = 'default';
-                    });
-
-                    const idx = parseInt(this.dataset.index);
-                    const feedbackDiv = document.getElementById('quiz-feedback');
-
-                    if (idx === q.correct) {
-    this.classList.add('correct');
-    score++; // increment score
-    feedbackDiv.innerHTML = '<strong style="color: #10b981;">Correct! Excellent!</strong> 🎉';
-} else {
-    this.classList.add('incorrect');
-    document.querySelectorAll('.quiz-option')[q.correct].classList.add('correct');
-    feedbackDiv.innerHTML = '<strong style="color: #ef4444;">Not quite.</strong> Correct answer highlighted.';
+  setTimeout(() => {
+    jordanBubble.textContent = phase.jordan;
+    jordanBubble.classList.add("visible");
+  }, 1200);
 }
 
+/* =========================
+   PHASE NAVIGATION
+========================= */
+nextBtn.addEventListener("click", () => {
+  currentPhase++;
+  if (currentPhase < phases.length) {
+    showPhase();
+  } else {
+    dynamicContent.classList.add("hidden");
+    quizArea.classList.remove("hidden");
+    showQuizQuestion();
+  }
+});
 
-                    // Automatically go to next question after 2 seconds
-                    setTimeout(() => {
-                        currentQuiz++;
-                        if (currentQuiz < quizQuestions.length) {
-                            showQuizQuestion();
-                        } else {
-                           quizArea.classList.add('hidden');
-completion.classList.remove('hidden');
+/* =========================
+   QUIZ LOGIC
+========================= */
+function showQuizQuestion() {
+  const q = quizQuestions[currentQuiz];
+  quizProgress.textContent = `Quiz Question ${currentQuiz + 1} of 5`;
 
-const message = document.getElementById('final-message');
+  quizArea.innerHTML = `
+    <div class="quiz-question">${q.question}</div>
+    <div class="quiz-options">
+      ${q.options.map((opt, i) =>
+        `<div class="quiz-option" data-index="${i}">${opt}</div>`
+      ).join("")}
+    </div>
+    <div id="quiz-feedback" style="margin-top:30px;font-size:22px;text-align:center;"></div>
+  `;
 
-if (score === 5) {
-    message.innerHTML = "Outstanding! 🌟 You have an excellent understanding of how MUN conferences work. You’re absolutely ready to participate with confidence.";
-} else if (score >= 3) {
-    message.innerHTML = "Great job! 👍 You understand the MUN process well. With a little more practice, you’ll be fully confident at your first conference.";
-} else {
-    message.innerHTML = "Nice effort! 💡 You’ve made a strong start. Review the phases once more and you’ll feel much more confident soon.";
+  document.querySelectorAll(".quiz-option").forEach(opt => {
+    opt.addEventListener("click", function () {
+      document.querySelectorAll(".quiz-option").forEach(o => {
+        o.style.pointerEvents = "none";
+      });
+
+      const idx = parseInt(this.dataset.index);
+      const feedback = document.getElementById("quiz-feedback");
+
+      if (idx === q.correct) {
+        this.classList.add("correct");
+        score++;
+        feedback.innerHTML = "<b style='color:#10b981'>Correct!</b> Concept understood ✅";
+      } else {
+        this.classList.add("incorrect");
+        document.querySelectorAll(".quiz-option")[q.correct].classList.add("correct");
+        incorrectConcepts.push(q.concept);
+        feedback.innerHTML = `<b style='color:#ef4444'>Incorrect.</b> Review: ${q.concept}`;
+      }
+
+      setTimeout(() => {
+        currentQuiz++;
+        if (currentQuiz < quizQuestions.length) {
+          showQuizQuestion();
+        } else {
+          showFinalResult();
+        }
+      }, 2000);
+    });
+  });
 }
 
-                        }
-                    }, 2000);
-                });
-            });
-        }
-    </script>
+/* =========================
+   FINAL DYNAMIC RESULT
+========================= */
+function showFinalResult() {
+  quizArea.classList.add("hidden");
+  completion.classList.remove("hidden");
+
+  const message = document.getElementById("final-message");
+  const weakAreas = [...new Set(incorrectConcepts)].join(", ");
+
+  let title = "";
+  let feedback = "";
+
+  if (score === 5) {
+    title = "🏆 CONFIDENT MUN DELEGATE";
+    feedback = `
+      You have a complete and accurate understanding of how MUN conferences work.
+      You're fully prepared to participate confidently and lead discussions.
+    `;
+  } else if (score >= 3) {
+    title = "⚖️ STRONG FOUNDATION – NEEDS REFINEMENT";
+    feedback = `
+      You understand most of the MUN process well.
+      Focus on improving: <b>${weakAreas}</b>.
+      Revising these will greatly boost your confidence.
+    `;
+  } else {
+    title = "📘 LEARNING IN PROGRESS";
+    feedback = `
+      You’ve made a good start, but some key concepts need revision.
+      Pay special attention to: <b>${weakAreas}</b>.
+      Try the lesson again for stronger clarity.
+    `;
+  }
+
+  message.innerHTML = `
+    <h3 style="font-size:32px;color:#1e40af;margin-bottom:20px;">${title}</h3>
+    <p style="font-size:22px;line-height:1.6;">${feedback}</p>
+  `;
+}
+</script>
+
 </body>
 
 </html>
+
 
 
 
